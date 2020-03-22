@@ -64,7 +64,14 @@ void keyPressed(){
       //println("_vx="+_vx);
     }
   }else{
-    if(keyCode==49){
+    println("keycode="+keyCode);
+    if(keyCode==48){
+      println("setting color to avg(r,g,b) ...");
+      int gray=(_r+_g+_b)/3;
+      _r=gray;
+      _g=gray;
+      _b=gray;
+    }else if(keyCode==49){
       println("r++");
       _ar+=1;
     }else if(keyCode==50){
