@@ -7,23 +7,44 @@ t.ht()
 t.screen.bgcolor(0,0,0)
 t.pencolor(1,1,1)
 
-def navgen(niter,steplen,dlim,ulim):
+class colorboundary(object):
+    def __init__(self,rmin,rmax,gmin,gmax,bmin,bmax):
+        self.rmin=rmin
+        self.rmax=rmax
+        self.gmin=gmin
+        self.gmax=gmax
+        self.bmin=bmin
+        self.bmax=bmax
+
+def reflector(c,cmin,cmax,delta):
+    deltanew=delta
+    cnew=c
+    if c<cmin:
+        deltanew=-delta
+        cnew=cmin
+    elif c>cmax:
+        deltanew=-delta
+        cnew=cmax
+    return cnew,deltanew
+
+def navgen(niter,steplen,dlim,ulim,cb):
     rtdeg=ulim
     turndir=-1
-    r=1.0
-    g=0.0
-    b=0.0
+    r=cb.rmax
+    g=cb.gmax
+    b=cb.bmax
+    rdelta=-1/256
+    gdelta=-1/256
+    bdelta=-1/256
     for j in range(niter):
         print(j)
         for i in range(360):
-            r=math.sin(i)
-            g=math.cos(i)
-            if r<0:
-                g=-r
-                r=0
-            if g<0:
-                b=-g
-                g=0
+            r+=rdelta
+            g+=gdelta
+            b+=bdelta
+            r,rdelta=reflector(r,cb.rmin,cb.rmax,rdelta)
+            g,gdelta=reflector(g,cb.gmin,cb.gmax,gdelta)
+            b,bdelta=reflector(b,cb.bmin,cb.bmax,bdelta)
             t.pencolor(r,g,b)
             t.fd(steplen)
             t.rt(rtdeg)
@@ -47,4 +68,7 @@ def navgen(niter,steplen,dlim,ulim):
 # color dimension entered
 #navgen(4,5,-30,10) # edge blooming flower
 #navgen(1,10,-30,-10) # tri-gears
-navgen(8,10,-30,60)
+cb=colorboundary(0.0,0.1,0.0,1.0,0.0,0.1) # predominant greens
+#navgen(2,5,-5,30,cb) # 2 petal convergent flower
+#navgen(8,7,-7,30,cb) # color harmonics!
+navgen(4,6,-8,30,cb)
