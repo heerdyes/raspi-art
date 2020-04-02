@@ -68,7 +68,8 @@ def navgen(niter,steplen,dlim,ulim,cb):
 # color dimension entered
 #navgen(4,5,-30,10) # edge blooming flower
 #navgen(1,10,-30,-10) # tri-gears
-cb=colorboundary(0.0,0.1,0.0,1.0,0.0,0.1) # predominant greens
+#cb=colorboundary(0.0,0.1,0.0,1.0,0.0,0.1) # predominant greens
 #navgen(2,5,-5,30,cb) # 2 petal convergent flower
 #navgen(8,7,-7,30,cb) # color harmonics!
+cb=colorboundary(0.0,1.0,1.0,1.0,0.0,1.0) # green is stuck at 1
 navgen(4,6,-8,30,cb)
