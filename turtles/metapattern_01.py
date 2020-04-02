@@ -1,5 +1,7 @@
 import turtle
 import math
+from math import pi
+from math import degrees
 
 t=turtle.Turtle()
 t.speed(0)
@@ -47,27 +49,36 @@ class colorboundary(object):
         return self.pr.currval,self.pg.currval,self.pb.currval
 
 
-def navgen(niter,steplen,dlim,ulim,cb):
-    rtdeg=ulim
-    turndir=-1
+def navgen(niter,steplenparam,turnparam,cb):
     for j in range(niter):
         print(j)
         for i in range(360):
             cb.updatecolors()
             t.pencolor(cb.currentrgb())
-            t.fd(steplen)
-            t.rt(rtdeg)
-            if rtdeg>ulim:
-                rtdeg=ulim
-                turndir=-1
-            elif rtdeg<dlim:
-                rtdeg=dlim
-                turndir=1
-            rtdeg+=turndir
+            steplenparam.update()
+            t.fd(steplenparam.currval)
+            turnparam.update()
+            t.rt(turnparam.currval)
 
 
 rparam=parameter(1.0,0.5,1.0,-1/256)
-gparam=parameter(1.0,0.5,1.0,-1/256)
-bparam=parameter(0.0,0.0,1.0,1/256)
+gparam=parameter(1.0,0.5,1.0,-1/64)
+bparam=parameter(0.0,0.0,1.0,1/64)
 cb=colorboundary(rparam,gparam,bparam) # green is stuck at 1
-navgen(4,6,-8,30,cb)
+speedparam=parameter(10,10,10,0)
+pturn=parameter(-15,-15,-7.5,7.5/10)
+#navgen(4,speedparam,1,-15,-1,cb) # tri-ellipse
+#navgen(4,speedparam,1,-15,-2,cb) # the trellipse starts braiding
+#navgen(4,speedparam,1,-15,-5,cb) # optical fibre cable
+
+# exploring dlim:ulim = 2:1
+#navgen(4,speedparam,1,-15,-7.5,cb) # ELLIPSE detected! find out if it really is one!
+#navgen(4,speedparam,1,-10,-5,cb) # rounded rect or squared circle?
+#navgen(4,speedparam,1,-8,-4,cb) # rounded hexagon or hexagonal circle?
+#navgen(4,speedparam,1,-6,-3,cb) # dodecagonal circle or circular dodecagon?
+
+# exploring dlim:ulim = 3:1
+#navgen(4,speedparam,1,-30,-10,cb) # nested trellipse
+slparam=parameter(10,10,10,0)
+pturn=parameter(-15,-15,-7.5,1)
+navgen(4,slparam,pturn,cb) # again ellipse! added speed as dynamic parameter
