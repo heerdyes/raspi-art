@@ -79,6 +79,9 @@ pturn=parameter(-15,-15,-7.5,7.5/10)
 
 # exploring dlim:ulim = 3:1
 #navgen(4,speedparam,1,-30,-10,cb) # nested trellipse
-slparam=parameter(10,10,10,0)
-pturn=parameter(-15,-15,-7.5,1)
-navgen(4,slparam,pturn,cb) # again ellipse! added speed as dynamic parameter
+#slparam=parameter(10,10,10,0)
+#pturn=parameter(-15,-15,-7.5,1)
+#navgen(4,slparam,pturn,cb) # again ellipse! added speed as dynamic parameter
+pturn=parameter(-20,-30,28,1)
+#navgen(8,parameter(6,1,6,1),pturn,cb) # twine loops
+navgen(8,parameter(6,1,6,0.5),pturn,cb) # turtle doodles
