@@ -1,0 +1,5 @@
+# conversion
+gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=png16m -dGraphicsAlphaBits=4 -sOutputFile=chk.png chk.ps
+
+# separate directories for ps and png
+gs -dSAFER -dBATCH -dNOPAUSE -sDEVICE=png16m -dGraphicsAlphaBits=4 -sOutputFile='png/p02-%00d.png' ps/p02*.ps
