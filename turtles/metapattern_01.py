@@ -8,6 +8,7 @@ t.speed(0)
 t.ht()
 t.screen.bgcolor(0,0,0)
 t.pencolor(1,1,1)
+screen=t.Screen()
 
 
 class parameter(object):
@@ -61,6 +62,14 @@ def navgen(niter,steplenparam,turnparam,cb):
             t.rt(turnparam.currval)
 
 
+screen.onkey(khup,"Up")
+screen.onkey(khdown,"Down")
+screen.onkey(khleft,"Left")
+screen.onkey(khright,"Right")
+screen.onkey(khu,"u")
+screen.onkey(khd,"d")
+screen.listen()
+
 rparam=parameter(1.0,0.5,1.0,-1/256)
 gparam=parameter(1.0,0.5,1.0,-1/64)
 bparam=parameter(0.0,0.0,1.0,1/64)
@@ -84,4 +93,4 @@ pturn=parameter(-15,-15,-7.5,7.5/10)
 #navgen(4,slparam,pturn,cb) # again ellipse! added speed as dynamic parameter
 pturn=parameter(-20,-30,28,1)
 #navgen(8,parameter(6,1,6,1),pturn,cb) # twine loops
-navgen(8,parameter(6,1,6,0.5),pturn,cb) # turtle doodles
+navgen(8,parameter(6,1,6,0.4),pturn,cb) # turtle doodles
