@@ -11,10 +11,7 @@ t.ht()
 # globals
 ctr=1
 yname='zenspiral_fast'
-snapshot=False
-s=200
-a=90
-dx=5
+snapshot=True
 
 # function definitions
 def savescreen(fnm):
@@ -27,6 +24,8 @@ def savescreen(fnm):
         img=Image.open(fnmps)
         img.save(fnmpng,'png')
         os.remove(fnmps)
+    else:
+        print('[WARN] snapshot set to False. not saving screen')
 
 def getpixelcolor(x,y):
     y=-y
@@ -42,7 +41,8 @@ def getpixelcolor(x,y):
 def looktowards(t1,t2):
     x1,y1,x2,y2=t1.xcor(),t1.ycor(),t2.xcor(),t2.ycor()
     if x1==x2 and y1==y2:
-        return
+        print('[BOOM] point tried to look towards itself!')
+        return 0
     if x1==x2 and y1<y2:
         t1.setheading(90)
         return
@@ -61,15 +61,22 @@ def looktowards(t1,t2):
     dist=math.sqrt((x2-x1)**2 + (y2-y1)**2)
     return dist
 
-def spirofiller(tset):
-    global dx
+def weakcopy(ta,tb):
+    ta.up()
+    ta.setpos(tb.pos())
+    ta.setheading(tb.heading())
+    ta.down()
+
+def spirofiller(tset,rlim,dx):
+    global ctr
     cidx=1
     td=tset[0]
     tset[1].fd(dx)
     dist=looktowards(td,tset[1])
     rfxs=0
-    while rfxs<84:
+    while rfxs<rlim:
         td.fd(dx)
+        tset[(cidx-1)%4]=None
         tset[(cidx-1)%4]=td.clone()
         td.fd(dist-dx)
         rfxs+=1
@@ -78,12 +85,58 @@ def spirofiller(tset):
         nxtt.fd(dx)
         dist=looktowards(td,nxtt)
         cidx+=1
+        savescreen('img/zf-%03d'%ctr)
+        ctr+=1
 
-# flow
-tset=[]
-for i in range(4):
-    tset.append(t.clone())
-    t.fd(s)
-    t.lt(a)
+def resetturtles(teset,a):
+    for tx in teset:
+        tx.up()
+        tx.home()
+        tx.seth(a)
+        tx.down()
 
-spirofiller(tset)
+def dumptxy(teset):
+    print('[')
+    for tx in teset:
+        print(tx.xcor(),tx.ycor())
+    print(']')
+
+def postturtles_sq_l(teset,s):
+    for i in range(4):
+        for j in range(i+1):
+            teset[(i+1)%4].fd(s)
+            teset[(i+1)%4].lt(90)
+
+def postturtles_sq_r(teset,s):
+    for i in range(4):
+        for j in range(i+1):
+            teset[(i+1)%4].fd(s)
+            teset[(i+1)%4].rt(90)
+
+def mksentries(n):
+    teset=[]
+    for i in range(n):
+        ti=Turtle()
+        ti.ht()
+        ti.speed(0)
+        teset.append(ti)
+    return teset
+
+def compound0(s,m,d):
+    tset=mksentries(4)
+    # top
+    postturtles_sq_l(tset,s)
+    spirofiller(tset,m,d)
+    resetturtles(tset,180)
+    postturtles_sq_r(tset,s)
+    spirofiller(tset,m,d)
+    # bottom
+    resetturtles(tset,0)
+    postturtles_sq_r(tset,s)
+    spirofiller(tset,m,d)
+    resetturtles(tset,180)
+    postturtles_sq_l(tset,s)
+    spirofiller(tset,m,d)
+
+compound0(150,62,5)
+print('nimg:%d'%ctr)
