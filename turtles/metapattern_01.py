@@ -1,3 +1,6 @@
+# pattern running instructions:
+# python3 metapattern_01.py <m_01_recipes/drunkenspider
+# the interactive way is rather time taking
 import turtle
 import math
 from math import pi
@@ -8,10 +11,10 @@ t.speed(0)
 t.ht()
 t.screen.bgcolor(0,0,0)
 t.pencolor(1,1,1)
-screen=t.Screen()
+screen=turtle.Screen()
 
 
-class parameter(object):
+class Parameter:
     """ abstracts a parameter which can be dynamically controlled
         takes 4 params, current val, min, max, delta"""
     def __init__(self,pcurrval,pmin,pmax,pdelta):
@@ -33,7 +36,7 @@ class parameter(object):
         self.reflect()
 
 
-class colorboundary(object):
+class Colorboundary:
     """ abstracts the color boundary object.
         takes 3 parameters: red, green, blue """
     def __init__(self,pred,pgreen,pblue):
@@ -61,36 +64,18 @@ def navgen(niter,steplenparam,turnparam,cb):
             turnparam.update()
             t.rt(turnparam.currval)
 
+def mkparam(prompt,delim=' '):
+    sparr=input(prompt)
+    parr=sparr.split(delim)
+    print(parr)
+    return Parameter(float(parr[0]),float(parr[1]),float(parr[2]),float(parr[3]))
 
-screen.onkey(khup,"Up")
-screen.onkey(khdown,"Down")
-screen.onkey(khleft,"Left")
-screen.onkey(khright,"Right")
-screen.onkey(khu,"u")
-screen.onkey(khd,"d")
-screen.listen()
+rp=mkparam('red: ')
+gp=mkparam('green: ')
+bp=mkparam('blue: ')
+cb=Colorboundary(rp,gp,bp)
+speedparam=mkparam('init_len,min_len,max_len,delta: ')
+turnparam=mkparam('init_turn,min_turn,max_turn,delta: ')
+niter=int(input('niter: '))
 
-rparam=parameter(1.0,0.5,1.0,-1/256)
-gparam=parameter(1.0,0.5,1.0,-1/64)
-bparam=parameter(0.0,0.0,1.0,1/64)
-cb=colorboundary(rparam,gparam,bparam) # green is stuck at 1
-speedparam=parameter(10,10,10,0)
-pturn=parameter(-15,-15,-7.5,7.5/10)
-#navgen(4,speedparam,1,-15,-1,cb) # tri-ellipse
-#navgen(4,speedparam,1,-15,-2,cb) # the trellipse starts braiding
-#navgen(4,speedparam,1,-15,-5,cb) # optical fibre cable
-
-# exploring dlim:ulim = 2:1
-#navgen(4,speedparam,1,-15,-7.5,cb) # ELLIPSE detected! find out if it really is one!
-#navgen(4,speedparam,1,-10,-5,cb) # rounded rect or squared circle?
-#navgen(4,speedparam,1,-8,-4,cb) # rounded hexagon or hexagonal circle?
-#navgen(4,speedparam,1,-6,-3,cb) # dodecagonal circle or circular dodecagon?
-
-# exploring dlim:ulim = 3:1
-#navgen(4,speedparam,1,-30,-10,cb) # nested trellipse
-#slparam=parameter(10,10,10,0)
-#pturn=parameter(-15,-15,-7.5,1)
-#navgen(4,slparam,pturn,cb) # again ellipse! added speed as dynamic parameter
-pturn=parameter(-20,-30,28,1)
-#navgen(8,parameter(6,1,6,1),pturn,cb) # twine loops
-navgen(8,parameter(6,1,6,0.4),pturn,cb) # turtle doodles
+navgen(niter,speedparam,turnparam,cb)
