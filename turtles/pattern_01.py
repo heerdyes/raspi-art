@@ -1,3 +1,5 @@
+# this is also implemented as a recipe for metapattern_01
+# m_01_recipes/pattern_01
 import turtle
 
 t=turtle.Turtle()
