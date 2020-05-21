@@ -1,0 +1,5 @@
+rm snd.wav
+rm snd.png
+python3 sndgen.py
+gpicview snd.png &
+aplay snd.wav
