@@ -1,6 +1,8 @@
 double _x,_y,_xx,_yy;
 CParam rparam,gparam,bparam,oparam;
-MParam vxparam,vyparam;
+VariableParam vx,vy;
+double ax,ay;
+double cx,cy;
 HashMap<String,Parametric> symboltable;
 
 // --- global functions --- //
@@ -36,6 +38,10 @@ MParam mkmparam(String[] data,HashMap<String,Parametric> symtab){
   return new MParam(ll,ul,st,cv,d);
 }
 
+VariableParam mkvariable(String data){
+  return new VariableParam(Double.parseDouble(data));
+}
+
 // symbol table creation utility
 HashMap<String,Parametric> mksymtab(String[] data){
   HashMap<String,Parametric> symtab=new HashMap();
@@ -49,6 +55,8 @@ HashMap<String,Parametric> mksymtab(String[] data){
     // vx and vy hardcoded for now
     if(k.equals("vx")||k.equals("vy")){
       pv=mkmparam(v.split(" "),symtab);
+    }else if(k.equals("ux")||k.equals("uy")||k.equals("vxmax")||k.equals("vymax")){
+      pv=mkvariable(v);
     }else{
       pv=mkcparam(v.split(" "));
     }
@@ -61,6 +69,25 @@ HashMap<String,Parametric> mksymtab(String[] data){
 interface Parametric{
   void update();
   double getcurrval();
+}
+
+// class for variable symbols
+class VariableParam implements Parametric{
+  double value;
+  
+  VariableParam(double cv){
+    value=cv;
+  }
+  
+  void setcurrval(double v){ value=v; }
+  
+  double getcurrval(){ return value; }
+  
+  void update(){}
+  
+  String toString() {
+    return "["+value+"]";
+  }
 }
 
 // simple parameter class
@@ -134,6 +161,8 @@ class CParam implements Parametric{
   String toString(){
     return "["+lowerlim+","+upperlim+","+step+","+currval+"]";
   }
+  
+  void setdir(int d){ dir=d; }
 }
 
 // modulated CParam class
@@ -175,23 +204,26 @@ class MParam implements Parametric{
 }
 // --- end of custom data types --- //
 
+// --- flow --- //
 void setup(){
-  size(600,400);
+  size(640,480);
   background(0);
-  _x=width/2-50;
-  _y=height/2-50;
+  cx=width/2.0;
+  cy=height/2.0;
+  _x=10;
+  _y=10;
   _xx=_x;
   _yy=_y;
   String[] lines=loadStrings("00.cfg");
   symboltable=mksymtab(lines);
-  vxparam=(MParam)symboltable.get("vx");
-  vyparam=(MParam)symboltable.get("vy");
+  vx=(VariableParam)symboltable.get("ux");
+  vy=(VariableParam)symboltable.get("uy");
   rparam=(CParam)symboltable.get("r");
   gparam=(CParam)symboltable.get("g");
   bparam=(CParam)symboltable.get("b");
   oparam=(CParam)symboltable.get("o");
-  println(vxparam);
-  println(vyparam);
+  println(vx,vy);
+  println(ax,ay);
   println(rparam);
   println(gparam);
   println(bparam);
@@ -209,8 +241,13 @@ void updatecolor(){
 }
 
 void updateparams(){
-  vxparam.update();
-  vyparam.update();
+  double d=sqrt(sq((float)(_xx-cx))+sq((float)(_yy-cy)));
+  if(d!=0){
+    ax=(cx-_xx)/sq((float)d);
+    ay=(cy-_yy)/sq((float)d);
+  }
+  vx.setcurrval(vx.getcurrval()+ax);
+  vy.setcurrval(vy.getcurrval()+ay);
   rparam.update();
   gparam.update();
   bparam.update();
@@ -225,8 +262,8 @@ void draw(){
   if(_y<0){        _y=height-10;_yy=_y; }
   updateparams();
   updatecolor();
-  _xx+=vxparam.getcurrval();
-  _yy+=vyparam.getcurrval();
+  _xx+=vx.getcurrval();
+  _yy+=vy.getcurrval();
   line((float)_x,(float)_y,(float)_xx,(float)_yy);
   _x=_xx;
   _y=_yy;
