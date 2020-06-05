@@ -1,7 +1,7 @@
 // --- based on code from the book Generative Art by Matt Pearson --- //
-FractalRoot pentagon;
-int _maxlevels=4;
-float _strutFactor=0.2;
+FractalRoot frshape;
+int _maxlevels=3;
+float _strutFactor=0.25;
 float _strutNoise;
 int _numSides=4;
 
@@ -43,7 +43,7 @@ class Branch{
   }
   
   void drawMe(){
-    strokeWeight(5-level);
+    strokeWeight(4-level);
     for(int i=0;i<outerPoints.length;i++){
       int nexti=i+1;
       if(nexti==outerPoints.length){nexti=0;}
@@ -136,8 +136,8 @@ class FractalRoot{
     float centY=height/2;
     float angleStep=360.0f/_numSides;
     for(int i=0;i<360;i+=angleStep){
-      float x=centX+(400*cos(radians(startAngle+i)));
-      float y=centY+(400*sin(radians(startAngle+i)));
+      float x=centX+(200*cos(radians(startAngle+i)));
+      float y=centY+(200*sin(radians(startAngle+i)));
       pointArr=(PointObj[])append(pointArr,new PointObj(x,y));
     }
     rootBranch=new Branch(0,0,pointArr);
@@ -149,15 +149,20 @@ class FractalRoot{
 }
 
 void setup(){
-  size(1000,1000);
+  size(640,480);
   smooth();
-  _strutNoise=random(10);
+  _strutNoise=0;
 }
 
 void draw(){
   background(255);
   _strutNoise+=0.01;
-  _strutFactor=noise(_strutNoise)*2;
-  pentagon=new FractalRoot(frameCount);
-  pentagon.drawShape();
+  _strutFactor=(noise(_strutNoise)*3)-1;
+  frshape=new FractalRoot(frameCount);
+  frshape.drawShape();
+  saveFrame("output/fractal_sutcliffe_####.png");
+}
+
+void mousePressed(){
+  exit();
 }
