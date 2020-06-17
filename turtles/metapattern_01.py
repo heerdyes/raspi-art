@@ -11,10 +11,14 @@ import os
 # globals
 yname='metapattern_01_'
 snapshot=False
+imgfname='_tmp_'
+snapctr=0
+snapfreq=999
 
 def savescreen(fnm):
     global snapshot
     if snapshot:
+        print('[snapping screenshot]')
         fnmps=fnm+'.ps'
         fnmpng=fnm+'.png'
         cv=turtle.getcanvas()
@@ -56,14 +60,20 @@ def draw_background(a_turtle):
     a_turtle.setheading(turtleheading)
     a_turtle.speed(turtlespeed)
 
+def clickhandler(x,y):
+    """ take a screenshot """
+    global snapctr
+    savescreen('img/%s_%03d'%(imgfname,snapctr))
+    snapctr+=1
 
+turtle.onscreenclick(clickhandler)
 t=turtle.Turtle()
 t.speed(0)
 t.ht()
 t.screen.bgcolor(0,0,0)
 t.pencolor(1,1,1)
 screen=turtle.Screen()
-screen.setup(1200,800)
+screen.setup(1600,1000)
 draw_background(t)
 
 
@@ -116,6 +126,8 @@ def navgen(niter,steplenparam,turnparam,cb):
             t.fd(steplenparam.currval)
             turnparam.update()
             t.rt(turnparam.currval)
+        if j%snapfreq==0:
+            clickhandler(0,0)
 
 def mkparam(prompt,delim=' '):
     sparr=input(prompt)
@@ -130,20 +142,21 @@ cb=Colorboundary(rp,gp,bp)
 speedparam=mkparam('init_len,min_len,max_len,delta: ')
 turnparam=mkparam('init_turn,min_turn,max_turn,delta: ')
 niter=int(input('niter: '))
-imgfname='_tmp_'
 try:
     sep=input()
     if sep=='---':
         print()
         sinitloc=input('init location: ')
-        initloc=sinitloc.split(',')
+        initloc=sinitloc.split(' ')
         ix,iy=int(initloc[0]),int(initloc[1])
         print(ix,iy)
         t.up()
         t.goto(ix,iy)
         t.down()
-        imgfname=yname+input('image name: ')
-        print(imgfname)
+        simgfreq=input('imagename, frequency: ')
+        data=simgfreq.split(' ')
+        imgfname,snapfreq=yname+data[0],int(data[1])
+        print(imgfname,snapfreq)
         snapshot=True
 except EOFError as eofe:
     pass
