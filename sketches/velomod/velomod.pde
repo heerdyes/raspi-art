@@ -22,7 +22,7 @@ void setup(){
   _ar=1;
   _ag=1;
   _ab=-1;
-  String[] lines=loadStrings("cfg_00.txt");
+  String[] lines=loadStrings("cfg_spring.txt");
   String[] vxlims=lines[0].split(" ");
   String[] vylims=lines[1].split(" ");
   String[] vxysteps=lines[2].split(" ");
@@ -55,7 +55,6 @@ void updatespeed(){
 }
 
 void draw(){
-  //saveFrame("output/linegame_####.png");
   if(_x>width){    _x=10;_xx=_x;        }
   if(_y>height){   _y=10;_yy=_y;        }
   if(_x<0){        _x=width-10;_xx=_x;  }
@@ -74,4 +73,5 @@ void draw(){
   line((float)_x,(float)_y,(float)_xx,(float)_yy);
   _x=_xx;
   _y=_yy;
+  saveFrame("output/springwave_####.png");
 }
