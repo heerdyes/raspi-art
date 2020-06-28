@@ -139,7 +139,7 @@ Parameter mkparam(String line,String delim){
 
 void setup(){
   t=new Turtle();
-  size(1200,800);
+  size(800,600);
   smooth();
   colorMode(RGB,1.0);
   background(0);
