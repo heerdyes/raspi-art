@@ -24,16 +24,16 @@ class Pen:
         lt(-a)
     
     def pu(self):
-        self.pendown=false
+        self.pendown=False
     
     def pd(self):
-        self.pendown=true
+        self.pendown=True
     
     def up(self):
-        pu()
+        self.pu()
     
     def down(self):
-        pd()
+        self.pd()
     
     def seth(self,a):
         self.angle=a
@@ -80,6 +80,7 @@ p=Pen()
 fdo=SineOsc()
 lto=SineOsc()
 fprefix='__'
+cfgpath='cfg/tmp.cfg'
 
 # funxions #
 def spin():
@@ -89,13 +90,9 @@ def spin():
         fdo.update()
         lto.update()
 
-def setup():
-    global fprefix
-    size(800,600)
-    smooth()
-    colorMode(RGB,1.0)
-    background(0)
-    cfglines=loadStrings("cfg/tmp.cfg")
+# file io
+def loadcfg(cfgfile):
+    cfglines=loadStrings(cfgfile)
     rgba=cfglines[0].split(' ')
     fdl=cfglines[1].split(' ')
     ltl=cfglines[2].split(' ')
@@ -109,9 +106,31 @@ def setup():
     p.y=(height/2)+dy
     p.pencolor([float(rgba[0]),float(rgba[1]),float(rgba[2]),float(rgba[3])])
 
+def setup():
+    global fprefix
+    size(800,600)
+    smooth()
+    colorMode(RGB,1.0)
+    background(0)
+    loadcfg(cfgpath);
+
 def draw():
     spin()
 
 def mouseClicked():
     print('snapping a frame')
     saveFrame('rec/%s-####.png'%fprefix)
+
+def keyReleased():
+    if key=='c':
+        print('clearing screen!')
+        background(0)
+    if key=='r':
+        print('reloading!')
+        loadcfg(cfgpath)
+    if key=='R':
+        print('clearing screen and reloading!')
+        p.up()
+        background(0)
+        loadcfg(cfgpath)
+        p.down()
