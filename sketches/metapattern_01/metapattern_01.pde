@@ -131,7 +131,6 @@ void navgen(Parameter steplenparam,Parameter turnparam,Colorboundary cb){
 }
 
 Parameter mkparam(String line,String delim){
-  //String[] cfglines=loadStrings("tmp.cfg");
   String[] parr=line.split(delim);
   Parameter p=new Parameter(float(parr[0]),float(parr[1]),float(parr[2]),float(parr[3]));
   return p;
@@ -143,7 +142,7 @@ void setup(){
   smooth();
   colorMode(RGB,1.0);
   background(0);
-  String[] cfglines=loadStrings("tmp.cfg");
+  String[] cfglines=loadStrings("cfg/tmp.cfg");
   rp=mkparam(cfglines[0]," ");
   gp=mkparam(cfglines[1]," ");
   bp=mkparam(cfglines[2]," ");
