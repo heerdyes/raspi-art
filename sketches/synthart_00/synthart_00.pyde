@@ -62,10 +62,12 @@ class SineOsc:
         self.t=0.0
     
     def populate(self,a,f,d,p):
+        self.currval=0.0
         self.amplitude=float(a)
         self.frequency=float(f)
         self.timediv=float(d)
         self.phase=float(p)
+        self.t=0.0
         print('[SO] a=%f,f=%f,d=%f,p=%f'%(self.amplitude,self.frequency,self.timediv,self.phase))
     
     def update(self):
@@ -104,6 +106,7 @@ def loadcfg(cfgfile):
     lto.populate(ltl[0],ltl[1],ltl[2],ltl[3])
     p.x=(width/2)+dx
     p.y=(height/2)+dy
+    p.seth(0.0)
     p.pencolor([float(rgba[0]),float(rgba[1]),float(rgba[2]),float(rgba[3])])
 
 def setup():
@@ -130,7 +133,5 @@ def keyReleased():
         loadcfg(cfgpath)
     if key=='R':
         print('clearing screen and reloading!')
-        p.up()
         background(0)
         loadcfg(cfgpath)
-        p.down()
