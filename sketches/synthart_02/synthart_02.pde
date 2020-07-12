@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 // class definitions //
 class Pen{
   float x,y;
@@ -27,6 +29,7 @@ class Pen{
   }
   
   void write(String txt){
+    println("txt:"+txt+" @("+x+","+y+"); color:"+rgba[0]);
     text(txt,x,y);
   }
   
@@ -68,12 +71,27 @@ class Pen{
   }
 }
 
+class SineWave{
+  float A;  // amplitude
+  float f;  // frequency
+  float th; // theta
+  
+  SineWave(float _A,float _f,float _th){
+    A=_A;
+    f=_f;
+    th=_th;
+  }
+  
+  float fx(float t_){
+    //return A*sin(2*PI*f*(t_+th));
+    return A*sin(f*(t_+th));
+  }
+}
+
 class SineOsc{
   float currval;
-  float amplitude;
-  float frequency;
+  SineWave sw;
   float timediv;
-  float phase;
   float t;
   
   SineOsc(){
@@ -82,25 +100,50 @@ class SineOsc{
   
   SineOsc(float a,float f,float d,float p){
     currval=0.0;
-    amplitude=a;
-    frequency=f;
+    sw=new SineWave(a,f,p);
     timediv=d;
-    phase=p;
     t=0.0;
   }
   
   void populate(float a,float f,float d,float p){
     currval=0.0;
-    amplitude=a;
-    frequency=f;
+    sw.A=a;
+    sw.f=f;
     timediv=d;
-    phase=p;
+    sw.th=p;
     t=0.0;
-    println(String.format("[SO] a=%f,f=%f,d=%f,p=%f",amplitude,frequency,timediv,phase));
+    println(String.format("[SO] a=%f,f=%f,d=%f,p=%f",sw.A,sw.f,timediv,sw.th));
   }
   
   float fx(float t_){
-    return amplitude*sin(frequency*(t_+phase));
+    return sw.fx(t_);
+  }
+  
+  void update(){
+    currval=fx(t);
+    t+=timediv;
+  }
+}
+
+class PolySineOsc{
+  ArrayList<SineWave> harmonics;
+  float currval;
+  float timediv;
+  float t;
+  
+  PolySineOsc(ArrayList<SineWave> swlist,float d){
+    harmonics=swlist;
+    timediv=d;
+    t=0.0;
+  }
+  
+  float fx(float t_){
+    float accumulator=0.0;
+    for(SineWave swi:harmonics){
+      float swval=swi.fx(t_);
+      accumulator+=swval;
+    }
+    return accumulator;
   }
   
   void update(){
@@ -137,14 +180,14 @@ class OscPlot{
     plotter.fd(300);
   }
   
-  void plotxy(SineOsc so){
+  void plotxy(PolySineOsc pso){
     plotter.gotoxy(x,y);
     plotter.refreshpen();
     plotter.seth(90);
     float t=0.0;
     float sf=50.0; // scale factor
     for(int i=0;i<1150;i++){
-      float y=so.fx(t);
+      float y=pso.fx(t);
       float ya=sf*y;
       plotter.pu();
       plotter.fd(ya);
@@ -161,21 +204,20 @@ class OscPlot{
     plotter.refreshpen();
   }
   
-  void legend(float[] fdcolor,float[] ltcolor){
-    float[] w=new float[]{0.9,0.9,0.8,1.0};
+  void legend(float[] fdcolor,float[] ltcolor,float[] wcolor){
     plotter.gotoxy(x+360,y+250);
-    plotter.pencolor(w);
+    pencolor(wcolor);
     plotter.write("fd");
     plotter.movexy(20,0);
     plotter.seth(0);
-    plotter.pencolor(fdcolor);
+    pencolor(fdcolor);
     plotter.fd(15);
     plotter.gotoxy(x+360,y+270);
-    plotter.pencolor(w);
+    pencolor(w);
     plotter.write("lt");
     plotter.movexy(20,0);
     plotter.seth(0);
-    plotter.pencolor(ltcolor);
+    pencolor(ltcolor);
     plotter.fd(15);
   }
 }
@@ -184,40 +226,67 @@ class OscPlot{
 float jump=1;
 float turn=1;
 int ctr=0;
-Pen p;
-SineOsc fdo=new SineOsc();
-SineOsc lto=new SineOsc();
-Pen posc;
+Pen p,posc;
+PolySineOsc fdpso,ltpso;
 OscPlot op;
 String fprefix="__";
 String cfgpath="cfg/tmp.cfg";
+float[] g=new float[]{0.0,1.0,0.0,1.0};
+float[] r=new float[]{1.0,0.0,0.0,1.0};
+float[] w=new float[]{0.9,0.9,0.8,1.0};
 
 // functions //
 void spin(){
   for(int i=0;i<360;i++){
-    p.fd(fdo.currval);
-    p.lt(lto.currval);
-    fdo.update();
-    lto.update();
+    p.fd(fdpso.currval);
+    p.lt(ltpso.currval);
+    fdpso.update();
+    ltpso.update();
   }
+}
+
+PolySineOsc parseharmonics(String oscline){
+  String[] harmonics=oscline.split(";");
+  float tdiv=float(harmonics[0]);
+  ArrayList<SineWave> waves=new ArrayList<SineWave>();
+  for(int i=1;i<harmonics.length;i++){
+    String h=harmonics[i];
+    String[] waveprops=h.split(" ");
+    float amp=float(waveprops[0]);
+    float freq=float(waveprops[1]);
+    float phs=float(waveprops[2]);
+    SineWave sw=new SineWave(amp,freq,phs);
+    waves.add(sw);
+  }
+  PolySineOsc pso=new PolySineOsc(waves,tdiv);
+  return pso;
 }
 
 // file io
 void loadcfg(String cfgfile){
   String[] cfglines=loadStrings(cfgfile);
   String[] rgba=cfglines[0].split(" ");
-  String[] fdl=cfglines[1].split(" ");
-  String[] ltl=cfglines[2].split(" ");
+  fdpso=parseharmonics(cfglines[1]);
+  ltpso=parseharmonics(cfglines[2]);
   String[] nmxy=cfglines[3].split(" ");
   fprefix=nmxy[0];
   float dx=float(nmxy[1]);
   float dy=float(nmxy[2]);
-  fdo.populate(float(fdl[0]),float(fdl[1]),float(fdl[2]),float(fdl[3]));
-  lto.populate(float(ltl[0]),float(ltl[1]),float(ltl[2]),float(ltl[3]));
   p.x=(width/2)+dx;
   p.y=(height/2)+dy;
   p.seth(0.0);
   p.pencolor(new float[]{float(rgba[0]),float(rgba[1]),float(rgba[2]),float(rgba[3])});
+}
+
+void initgraphscope(){
+  posc.pencolor(w);
+  op.axes();
+  op.legend(g,r,w);
+  op.pencolor(g);
+  op.plotxy(fdpso);
+  op.pencolor(r);
+  op.plotxy(ltpso);
+  p.refreshpen();
 }
 
 void setup(){
@@ -230,15 +299,7 @@ void setup(){
   posc=new Pen();
   posc.pencolor(new float[]{0.9,0.9,0.8,1.0});
   op=new OscPlot(posc,height,height/2);
-  op.axes();
-  float[] g=new float[]{0.0,1.0,0.0,1.0};
-  float[] r=new float[]{1.0,0.0,0.0,1.0};
-  op.legend(g,r);
-  op.pencolor(g);
-  op.plotxy(fdo);
-  op.pencolor(r);
-  op.plotxy(lto);
-  p.refreshpen();
+  initgraphscope();
 }
 
 void draw(){
@@ -259,11 +320,12 @@ void keyReleased(){
   if(key=='r'){
     println("reloading!");
     loadcfg(cfgpath);
+    initgraphscope();
   }
   if(key=='R'){
-    print("clearing screen and reloading!");
-    fill(0);
-    rect(0,0,height,height);
+    println("clearing screen and reloading!");
+    background(0);
     loadcfg(cfgpath);
+    initgraphscope();
   }
 }
