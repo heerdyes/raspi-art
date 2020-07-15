@@ -156,15 +156,23 @@ class OscPlot{
   Pen plotter;
   float x;
   float y;
+  float xsf;
+  float ysf;
+  float horilimit=465;
+  float vertlimit=600;
+  float timediv;
   
-  OscPlot(Pen _p,float _x,float _y){
+  OscPlot(Pen _p,float _x,float _y,float td){
     plotter=_p;
     x=_x;
     y=_y;
+    timediv=td;
+    xsf=0.4;
+    ysf=30.0;
   }
   
-  OscPlot(float _x,float _y){
-    this(new Pen(),_x,_y);
+  OscPlot(float _x,float _y,float td){
+    this(new Pen(),_x,_y,td);
   }
   
   void axes(){
@@ -172,12 +180,12 @@ class OscPlot{
     plotter.gotoxy(x,y);
     plotter.refreshpen();
     plotter.seth(0);
-    plotter.fd(465);
-    plotter.bk(465);
+    plotter.fd(horilimit);
+    plotter.bk(horilimit);
     plotter.lt(90);
-    plotter.fd(300);
-    plotter.bk(600);
-    plotter.fd(300);
+    plotter.fd(vertlimit/2);
+    plotter.bk(vertlimit);
+    plotter.fd(vertlimit/2);
   }
   
   void plotxy(PolySineOsc pso){
@@ -185,17 +193,17 @@ class OscPlot{
     plotter.refreshpen();
     plotter.seth(90);
     float t=0.0;
-    float sf=50.0; // scale factor
-    for(int i=0;i<1150;i++){
+    int niter=floor(horilimit/xsf);
+    for(int i=0;i<niter;i++){
       float y=pso.fx(t);
-      float ya=sf*y;
+      float ya=ysf*y;
       plotter.pu();
       plotter.fd(ya);
       plotter.dot();
       plotter.bk(ya);
       plotter.pd();
-      plotter.movexy(0.4,0);
-      t+=0.01;
+      plotter.movexy(xsf,0);
+      t+=timediv;
     }
   }
   
@@ -225,19 +233,23 @@ class OscPlot{
 // globals //
 float jump=1;
 float turn=1;
+float canvaswidth=603.0;
 int ctr=0;
 Pen p,posc;
 PolySineOsc fdpso,ltpso;
 OscPlot op;
 String fprefix="__";
+String[] cfglines;
 String cfgpath="cfg/tmp.cfg";
 float[] g=new float[]{0.0,1.0,0.0,1.0};
 float[] r=new float[]{1.0,0.0,0.0,1.0};
 float[] w=new float[]{0.9,0.9,0.8,1.0};
+float xscalefactor,yscalefactor,timedivision;
+int spinspeed=360;
 
 // functions //
-void spin(){
-  for(int i=0;i<360;i++){
+void spin(int n){
+  for(int i=0;i<n;i++){
     p.fd(fdpso.currval);
     p.lt(ltpso.currval);
     fdpso.update();
@@ -247,9 +259,8 @@ void spin(){
 
 PolySineOsc parseharmonics(String oscline){
   String[] harmonics=oscline.split(";");
-  float tdiv=float(harmonics[0]);
   ArrayList<SineWave> waves=new ArrayList<SineWave>();
-  for(int i=1;i<harmonics.length;i++){
+  for(int i=0;i<harmonics.length;i++){
     String h=harmonics[i];
     String[] waveprops=h.split(" ");
     float amp=float(waveprops[0]);
@@ -258,27 +269,36 @@ PolySineOsc parseharmonics(String oscline){
     SineWave sw=new SineWave(amp,freq,phs);
     waves.add(sw);
   }
-  PolySineOsc pso=new PolySineOsc(waves,tdiv);
+  PolySineOsc pso=new PolySineOsc(waves,timedivision);
   return pso;
 }
 
 // file io
 void loadcfg(String cfgfile){
-  String[] cfglines=loadStrings(cfgfile);
+  cfglines=loadStrings(cfgfile);
   String[] rgba=cfglines[0].split(" ");
+  String[] globcfg=cfglines[4].split(" ");
+  xscalefactor=float(globcfg[0]);
+  yscalefactor=float(globcfg[1]);
+  timedivision=float(globcfg[2]);
+  spinspeed=int(globcfg[3]);
+  println("xscalefactor:"+xscalefactor+",yscalefactor:"+yscalefactor+",timedivision:"+timedivision);
   fdpso=parseharmonics(cfglines[1]);
   ltpso=parseharmonics(cfglines[2]);
   String[] nmxy=cfglines[3].split(" ");
   fprefix=nmxy[0];
   float dx=float(nmxy[1]);
   float dy=float(nmxy[2]);
-  p.x=(width/2)+dx;
+  p.x=(canvaswidth/2)+dx;
   p.y=(height/2)+dy;
   p.seth(0.0);
   p.pencolor(new float[]{float(rgba[0]),float(rgba[1]),float(rgba[2]),float(rgba[3])});
 }
 
 void initgraphscope(){
+  op.xsf=xscalefactor;
+  op.ysf=yscalefactor;
+  op.timediv=timedivision;
   posc.pencolor(w);
   op.axes();
   op.legend(g,r,w);
@@ -298,30 +318,31 @@ void setup(){
   loadcfg(cfgpath);
   posc=new Pen();
   posc.pencolor(new float[]{0.9,0.9,0.8,1.0});
-  op=new OscPlot(posc,height,height/2);
+  op=new OscPlot(posc,height,height/2,timedivision);
   initgraphscope();
 }
 
 void draw(){
-  spin();
+  spin(spinspeed);
+}
+
+void savecfg(String fp){
+  PrintWriter fout=createWriter(fp);
+  for(String s:cfglines){
+    fout.println(s);
+  }
+  fout.flush();
+  fout.close();
 }
 
 void mouseClicked(){
   println("snapping a frame");
   saveFrame(String.format("rec/%s-####.png",fprefix));
+  println("saving this configuration");
+  savecfg(String.format("cfg/%s.cfg",fprefix));
 }
 
 void keyReleased(){
-  if(key=='c'){
-    println("clearing screen!");
-    fill(0);
-    rect(0,0,height,height);
-  }
-  if(key=='r'){
-    println("reloading!");
-    loadcfg(cfgpath);
-    initgraphscope();
-  }
   if(key=='R'){
     println("clearing screen and reloading!");
     background(0);
