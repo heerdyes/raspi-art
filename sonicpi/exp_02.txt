@@ -1,0 +1,21 @@
+# Welcome to Sonic Pi v3.1
+bardur=1.0
+t16=(1.0/16.0)*bardur
+t8=(1.0/8.0)*bardur
+t4=(2.0/8.0)*bardur
+t2=(4.0/8.0)*bardur
+t1=bardur
+
+use_synth :fm
+play 77,amp:0.5,release:0.18
+play 79,amp:0.5,release:0.18
+sleep t4
+play 77,amp:0.5,release:0.18
+play 81,amp:0.5,release:0.18
+sleep t4
+play 72,amp:0.5,release:0.16
+play 79,amp:0.5,release:0.16
+sleep t8
+play 72,amp:0.5,release:0.16
+play 77,amp:0.5,release:0.16
+sleep t4

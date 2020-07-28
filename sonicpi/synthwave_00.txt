@@ -1,0 +1,54 @@
+lfo1=40
+jump1=1
+lfo2=70
+jump2=1
+lfo3=60
+jump3=0.6
+
+live_loop :random_riff do
+  use_synth :dsaw
+  notes=(ring :e3,:g3,:a3,:b3)
+  play notes.tick,release: 0.130,cutoff: lfo1
+  sleep 0.125
+end
+
+live_loop :lfo_clk do
+  lfo1+=jump1
+  if lfo1 > 90 or lfo1 < 40
+    jump1=-jump1
+  end
+  lfo2+=jump2
+  if lfo2 > 100 or lfo2 < 60
+    jump2=-jump2
+  end
+  lfo3+=jump3
+  if lfo3 > 100 or lfo3 < 60
+    jump3=-jump3
+  end
+  sleep 0.0625
+end
+
+live_loop :beat0 do
+  sample :bd_haus,cutoff: 80
+  sleep (0.125*4)
+  sample :drum_snare_hard,cutoff: lfo2
+  sleep (0.125*4)
+end
+
+live_loop :syn0 do
+  use_synth :prophet
+  notes=(ring :b4,:a4,:g4,:fs4)
+  play notes.tick,amp: 1.0,attack: 0.25,sustain: 1.5,decay: 1.0,release: 1.0,cutoff: lfo3
+  sleep (0.125*32)
+end
+
+live_loop :syn1 do
+  use_synth :fm
+  sleep (0.125*31)
+  play :c4,release: 0.25
+  sleep (0.125*2)
+  play :fs4,release: 0.25
+  sleep (0.125*3)
+  play :g4,release: 0.3
+  sleep (0.125*12)
+end

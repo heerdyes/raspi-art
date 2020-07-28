@@ -1,0 +1,35 @@
+use_synth :piano
+play :ds
+sleep 0.25
+play :d
+sleep 0.25
+live_loop :zes do
+  notes=(ring :c,:r,:ds,:d,:c,:r,:c,:d,:ds,:f,:r,:r,:r,:r,:ds,:f,:g,:r,:f,:ds,:f,:r,:ds,:d,:b3,:c,:r,:r,:r,:r,:ds,:d)
+  play notes.tick
+  sleep 0.25
+end
+live_loop :drm do
+  sample :drum_bass_hard
+  sleep 0.25
+  sample :drum_cymbal_pedal
+  sleep 0.25
+  sample :drum_bass_hard
+  sleep 0.25
+  sample :drum_cymbal_pedal
+  sleep 0.25
+  sample :drum_bass_hard
+  sleep 0.25
+  sample :drum_cymbal_pedal
+  sleep 0.25
+  sample :drum_snare_soft
+  sleep 0.25
+  sample :drum_cymbal_pedal
+  sleep 0.25
+end
+live_loop :bss do
+  use_synth :dsaw
+  use_transpose -12
+  bnotes=(ring :c,:ds,:g2,:ds,:c,:ds,:g2,:ds,:c,:f,:f2,:f,:c,:f,:f2,:f,:ds,:g,:c,:g,:d,:f,:as2,:f,:c,:ds,:g2,:ds,:c,:ds,:g2,:ds)
+  play bnotes.tick,release: 0.25,cutoff: 75
+  sleep 0.25
+end

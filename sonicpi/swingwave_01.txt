@@ -1,0 +1,82 @@
+lfo1=40
+jump1=0.8
+lfo2=70
+jump2=1
+lfo3=60
+jump3=0.6
+lfo4=0.8
+jump4=-0.02
+lfo5=-0.95
+jump5=0.05
+
+live_loop :lfo_clk do
+  lfo1+=jump1
+  if lfo1 > 90 or lfo1 < 40
+    jump1=-jump1
+  end
+  lfo2+=jump2
+  if lfo2 > 100 or lfo2 < 60
+    jump2=-jump2
+  end
+  lfo3+=jump3
+  if lfo3 > 120 or lfo3 < 60
+    jump3=-jump3
+  end
+  lfo4+=jump4
+  if lfo4 > 0.9 or lfo4 < 0.4
+    jump4=-jump4
+  end
+  lfo5+=jump5
+  if lfo5 > 0.95
+    jump5=-jump5
+    lfo5=0.95
+  end
+  if lfo5 < -0.95
+    jump5=-jump5
+    lfo5=-0.95
+  end
+  sleep 0.0625
+end
+
+use_synth :tb303
+live_loop :squelch do
+  n=(ring :e1,:e2,:e3).tick
+  play n,release: 0.15,cutoff: lfo1,res: 0.82,wave: 0,amp: 0.45
+  #play n,release: 0.15,cutoff: 70,res: lfo4,wave: 0
+  #play n,release: 0.15,cutoff: lfo1,res: lfo4,wave: 0
+  sleep 0.150
+end
+
+live_loop :drm0 do
+  3.times do
+    sample :drum_bass_soft
+    sample :drum_cymbal_pedal
+    sleep (0.15*2)
+    sample :drum_bass_soft
+    sleep (0.15)
+    sample :drum_snare_hard
+    sleep (0.15*3)
+  end
+  sleep 0.15
+  sample :drum_snare_hard
+  sleep (0.15*2)
+  sample :drum_snare_hard
+  sleep (0.15*3)
+end
+
+use_synth :dsaw
+live_loop :syn0 do
+  play :b3,release: 0.3,sustain: 0.15*9,cutoff: 90,amp: 0.9,pan: lfo5
+  play :e4,release: 0.3,sustain: 0.15*9,cutoff: 90,amp: 0.9,pan: lfo5
+  sleep (0.15*11)
+  play :a3,release: 0.3,sustain: 0.15*10,cutoff: 90,amp: 0.9,pan: lfo5
+  play :fs4,release: 0.3,sustain: 0.15*9,cutoff: 90,amp: 0.9,pan: lfo5
+  sleep (0.15*12)
+  play :g3,release: 0.3,sustain: 0.15*10,cutoff: 90,amp: 0.9,pan: lfo5
+  play :g4,release: 0.3,sustain: 0.15*9,cutoff: 90,amp: 0.9,pan: lfo5
+  sleep (0.15*12)
+  play :a3,release: 0.3,sustain: 0.15*10,cutoff: 90,amp: 0.9,pan: lfo5
+  play :a4,release: 0.3,sustain: 0.15*10,cutoff: 90,amp: 0.9,pan: lfo5
+  sleep (0.15*13)
+end
+

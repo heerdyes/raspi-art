@@ -1,0 +1,45 @@
+live_loop :timbre do
+  use_synth :saw
+  play :e2,attack: 0,release: 0.3,cutoff: 90
+  sleep 0.3
+  play :g2,attack: 0,release: 0.3,cutoff: 90
+  sleep 0.3
+  play :a2,attack: 0,release: 0.3,cutoff: 90
+  sleep 0.3
+  play :b2,attack: 0,release: 0.3,cutoff: 90
+  sleep 0.3
+end
+
+live_loop :beats do
+  sample :drum_bass_hard
+  sleep (0.3*2)
+  sample :drum_snare_hard
+  sleep (0.3*2)
+end
+
+live_loop :steels do
+  sample :drum_cymbal_pedal
+  sleep 0.3
+  sample :drum_cymbal_closed
+  sleep 0.3
+  sample :drum_cymbal_pedal
+  sleep 0.3
+  sample :drum_cymbal_closed
+  sleep 0.3
+end
+
+live_loop :leads do
+  use_synth :fm
+  r1=(ring :b4,:e4,:b4,:a4)
+  r2=(ring :g4,:e4,:g4,:fs4)
+  4.times do
+    play r1.tick,release: 0.3,cutoff: 100
+    sleep 0.3
+  end
+  sleep (0.3*4)
+  4.times do
+    play r2.tick,release: 0.3,cutoff: 100
+    sleep 0.3
+  end
+  sleep (0.3*4)
+end
