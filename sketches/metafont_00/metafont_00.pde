@@ -170,6 +170,10 @@ class SymbolTracer{
   Pen t;
   HashMap<Character,List<Inst>> tbl;
   Pair bdim;
+  float chargap;
+  
+  float getBlockHeight(){return bdim.b;}
+  float getBlockWidth(){return bdim.a;}
   
   HashMap<Character,List<Inst>> genmap(String[] lines){
     HashMap<Character,List<Inst>> hm=new HashMap<Character,List<Inst>>();
@@ -193,6 +197,7 @@ class SymbolTracer{
     t=t_;
     tbl=genmap(lines);
     bdim=bdim_;
+    chargap=0.0;
   }
   
   void setBlockDimensions(float w,float h){
@@ -200,7 +205,7 @@ class SymbolTracer{
   }
   
   void trace(String txt,float x,float y){
-    println("[trace] "+txt);
+    log("trace",txt);
     t.gotoxy(x,y);
     t.seth(0);
     float currx=t.x;
@@ -214,11 +219,15 @@ class SymbolTracer{
       t.gotoxy(currx,curry);
       t.seth(0);
       t.up();
-      t.fd(bdim.a);
+      t.fd(bdim.a+chargap);
       t.down();
       currx=t.x;
       curry=t.y;
     }
+  }
+  
+  void trace(char x){
+    trace(""+x,t.x,t.y);
   }
 }
 
@@ -238,6 +247,9 @@ void setup(){
   typolines=loadStrings("machinehead.typo");
   st=new SymbolTracer(p,typolines,new Pair(20,32));
   st.trace("abcdefghijklmnopqrstuvwxyz",80,30);
+  st.t.x=80;
+  st.t.y=100;
+  st.chargap=5.0;
 }
 
 void draw(){}
@@ -250,4 +262,8 @@ void mouseClicked(){
 
 void keyReleased(){
   log("keyboard",""+key);
+  int ck=(int)key;
+  if(ck>=97&ck<=122 || ck>=65&&ck<=91){
+    st.trace(key);
+  }
 }
