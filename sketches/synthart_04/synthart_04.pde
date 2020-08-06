@@ -38,14 +38,20 @@ class SineWave{
     return A*sin(f*(t_+th));
   }
   
-  void updateA(float _A){
+  boolean updateA(float _A){
+    if(_A>scale)return false;
     A=_A;
     gA.setValue(A/scale);
+    return true;
   }
   
   void updatef(float _f){
     f=_f;
     gf.setValue(f);
+  }
+
+  String cfgrepr(){
+    return String.format("%f %f %f",A,f,th);
   }
 }
 
@@ -75,6 +81,15 @@ class PolySineOsc{
   void update(){
     currval=fx(t);
     t+=timediv;
+  }
+
+  String cfgrepr(){
+    StringBuffer sb=new StringBuffer();
+    for(SineWave swi:harmonics){
+      sb.append(swi.cfgrepr());
+      sb.append(";");
+    }
+    return sb.substring(0,sb.length()-1);
   }
 }
 
@@ -121,20 +136,26 @@ class Scope{
   }
   
   void wipe(){
-    println("clearing scope...");
+    log("scope","clearing...");
     fill(0);
     rect(ox,oy,w,h);
   }
   
   void plot(){
-    println("plotting scope...");
+    log("scope","replotting...");
     float t=0;
+    int pc=g.strokeColor;
+    float pr=red(pc);
+    float pg=green(pc);
+    float pb=blue(pc);
+    float pa=alpha(pc);
     stroke(c.r,c.g,c.b,c.a);
     for(int i=0;i<xdiv;i++){
       float ft=fn.fx(t);
       point(ox+t,(oy+h/2)-(ft*yscale));
       t+=xscale;
     }
+    stroke(pr,pg,pb,pa);
   }
   
   void outline(){
@@ -181,15 +202,17 @@ class Slider{
     fill(0,1,0);
     textSize(fntsz);
     text(""+currval,x+1,y+h/2+fntsz/2);
-    stroke(red(pc),green(pc),blue(pc),alpha(pc));
+    stroke(pr,pg,pb,pa);
   }
   
   void updateval(float dx){
-    currval+=dx;
     if(attr=='A'){
-      harmonic.updateA(currval);
+      if(harmonic.updateA(currval+dx)){
+        currval+=dx;
+      }
     }else if(attr=='f'){
-      harmonic.updatef(currval);
+      harmonic.updatef(currval+dx);
+      currval+=dx;
     }else{
       err("unknown attr!");
     }
@@ -201,7 +224,7 @@ class CtrlPanel{
   float w,h;
   ArrayList<Slider> xrow;
   ArrayList<Slider> yrow;
-  float dh=10; // slider horizontal margin
+  float dh=5; // slider horizontal margin
   float dv=10; // slider vertical margin
   float sw=35; // uniform slider width
   float sh=30; // uniform slider height
@@ -288,6 +311,9 @@ class CtrlPanel{
     wipecanvas();
     ss.updateval(1);
     ss.render(ssoc);
+    xscope.wipe();
+    xscope.plot();
+    yscope.plot();
   }
   
   void ssdown(){
@@ -295,6 +321,9 @@ class CtrlPanel{
     wipecanvas();
     ss.updateval(-1);
     ss.render(ssoc);
+    xscope.wipe();
+    xscope.plot();
+    yscope.plot();
   }
 }
 
@@ -370,7 +399,7 @@ void loadcfg(String cfgfile){
   xpso=parseharmonics(cfglines[1]);
   ypso=parseharmonics(cfglines[2]);
   initscope();
-  cp=new CtrlPanel(603,310,410,250,xpso,ypso);
+  cp=new CtrlPanel(603,310,430,250,xpso,ypso);
   cp.render();
   String[] nmxy=cfglines[3].split(" ");
   fprefix=nmxy[0];
@@ -380,8 +409,8 @@ void loadcfg(String cfgfile){
 }
 
 void initscope(){
-  xscope=new Scope(603,0,410,300,xdivisions,yscalefactor,new Colour(1,0,0,1),xpso);
-  yscope=new Scope(603,0,410,300,xdivisions,yscalefactor,new Colour(0,1,0,1),ypso);
+  xscope=new Scope(603,0,430,300,xdivisions,yscalefactor,new Colour(1,0,0,1),xpso);
+  yscope=new Scope(603,0,430,300,xdivisions,yscalefactor,new Colour(0,1,0,1),ypso);
   xscope.wipe();
   yscope.wipe();
   xscope.outline();
@@ -411,9 +440,14 @@ void draw(){
 
 void savecfg(String fp){
   PrintWriter fout=createWriter(fp);
-  for(String s:cfglines){
-    fout.println(s);
-  }
+  // write first line
+  fout.println(cfglines[0]);
+  // write harmonics
+  fout.println(xpso.cfgrepr());
+  fout.println(ypso.cfgrepr());
+  // write last two lines
+  fout.println(cfglines[3]);
+  fout.println(cfglines[4]);
   fout.flush();
   fout.close();
 }
