@@ -285,12 +285,14 @@ class CtrlPanel{
   
   void ssup(){
     if(ss==null)return;
+    wipecanvas();
     ss.updateval(1);
     ss.render(ssoc);
   }
   
   void ssdown(){
     if(ss==null)return;
+    wipecanvas();
     ss.updateval(-1);
     ss.render(ssoc);
   }
@@ -416,6 +418,11 @@ void savecfg(String fp){
   fout.close();
 }
 
+void wipecanvas(){
+  fill(0);
+  rect(0,0,int(canvaswidth),int(canvaswidth));
+}
+
 void mouseClicked(){
   if(mouseX<int(canvaswidth)){
     println("snapping a frame");
@@ -424,14 +431,13 @@ void mouseClicked(){
     savecfg(String.format("cfg/%s.cfg",fprefix));
   }
   if(mouseX>cp.ox && mouseY>cp.oy && mouseX<(cp.ox+cp.w) && mouseY<(cp.oy+cp.h)){
-    log("mouseClicked","click detected inside control panel");
+    log("controlpanel","click detected");
     cp.handlesliderselect(mouseX,mouseY);
   }
 }
 
 void mouseWheel(MouseEvent me){
   float e=me.getCount();
-  println(e);
   if(e==-1){
     cp.ssup();
   }else if(e==1){
@@ -446,7 +452,6 @@ void keyReleased(){
     println("implement this!");
   }
   if(key=='c'){
-    fill(0);
-    rect(0,0,603,603);
+    wipecanvas();
   }
 }
