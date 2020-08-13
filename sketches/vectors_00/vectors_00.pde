@@ -164,6 +164,8 @@ void setup(){
 }
 
 void draw(){
+  fill(0,0,0,10);
+  rect(0,0,width-1,height-1);
   for(int i=0;i<ms.length;i++){
     ms[i].update();
     ms[i].checkEdges();

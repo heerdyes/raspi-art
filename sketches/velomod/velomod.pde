@@ -73,5 +73,5 @@ void draw(){
   line((float)_x,(float)_y,(float)_xx,(float)_yy);
   _x=_xx;
   _y=_yy;
-  saveFrame("output/springwave_####.png");
+  //saveFrame("output/springwave_####.png");
 }

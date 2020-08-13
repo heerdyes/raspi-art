@@ -255,6 +255,8 @@ void updateparams(){
 }
 
 void draw(){
+  fill(0,0,0,30);
+  rect(0,0,width,height);
   //saveFrame("output/parammod_####.png");
   if(_x>width){    _x=10;_xx=_x;        }
   if(_y>height){   _y=10;_yy=_y;        }
