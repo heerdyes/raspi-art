@@ -5,14 +5,12 @@ from math import *
 
 
 class GenPaintWidget(Widget):
-  # weird RPi specific ghost click workaround
-  altsensor=False
-
   def on_touch_down(self,touch):
-    GenPaintWidget.altsensor=not GenPaintWidget.altsensor
-    if GenPaintWidget.altsensor:
+    evtclsnm=touch.__class__.__name__
+    if evtclsnm == 'HIDMotionEvent':
+      print('ignoring HIDMotionEvent passing through')
       return
-    print('touched at (%d,%d)'%(touch.x,touch.y))
+    print('[cls:%s] touched at (%d,%d)'%(evtclsnm,touch.x,touch.y))
     with self.canvas:
       Color(0.2,0.8,0.7,0.8)
       d1=30.
