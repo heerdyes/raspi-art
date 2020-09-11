@@ -1,5 +1,6 @@
 from kivy.app import App
 from kivy.uix.widget import Widget
+from kivy.uix.button import Button
 from kivy.graphics import *
 from math import *
 from random import random
@@ -11,7 +12,6 @@ class GenPaintWidget(Widget):
     if evtclsnm == 'HIDMotionEvent':
       print('ignoring HIDMotionEvent passing through')
       return
-    print('[cls:%s] touched at (%d,%d)'%(evtclsnm,touch.x,touch.y))
     color=(random(),1.,1.)
     with self.canvas:
       Color(*color,mode='hsv')
@@ -31,7 +31,16 @@ class GenPaintWidget(Widget):
 
 class GenPaintApp(App):
   def build(self):
-    return GenPaintWidget()
+    wmain=Widget()
+    self.paintarea=GenPaintWidget()
+    bclear=Button(text='clear',width=80,height=30,pos=(0,0))
+    bclear.bind(on_release=self.clear_canvas)
+    wmain.add_widget(self.paintarea)
+    wmain.add_widget(bclear)
+    return wmain
+
+  def clear_canvas(self,obj):
+    self.paintarea.canvas.clear()
 
 
 if __name__ == '__main__':
