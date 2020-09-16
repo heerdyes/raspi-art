@@ -45,6 +45,7 @@ class PowderBrush implements Brush{
   int reps=30;
   int radius=3;
   int alpha=15;
+  
   void touch(){
     stroke(0,255,0,alpha);
     for(int i=0;i<reps;i++){
@@ -58,19 +59,18 @@ class PowderBrush implements Brush{
   }
 }
 
-//MadBrush mb=new MadBrush();
-//ShadowBrush sb=new ShadowBrush();
-PowderBrush pb=new PowderBrush();
+int brush_index=0;
+Brush[] brushes=new Brush[]{new MadBrush(),new ShadowBrush(),new PowderBrush()};
 
 void setup(){
-  size(1400,1400);
+  size(800,600);
   stroke(0,255,0,30);
   background(0);
 }
 
 void draw(){
   if(pd){
-    pb.touch();
+    brushes[brush_index].touch();
   }
 }
 
@@ -89,5 +89,11 @@ void mouseReleased(){
 void keyReleased(){
   if(key=='c'){
     background(0);
+  }else if(key=='0'){
+    brush_index=0;
+  }else if(key=='1'){
+    brush_index=1;
+  }else if(key=='2'){
+    brush_index=2;
   }
 }
