@@ -1,0 +1,25 @@
+ON ERROR REPORT: PRINT " at line ";ERL:END
+t=0.0
+amp=300.0
+freq=6.0
+dt=0.01
+nx=1.0
+ny=1.0
+nf=freq
+na=amp
+MODE 12
+GCOL 8
+*Pointer
+REPEAT
+  MOUSE xpos%, ypos%, button%
+  CASE button OF
+    WHEN 1:nx=xpos%/1280:ny=ypos%/1024:nf=nx*freq:na=ny*amp
+    WHEN 2:CLS
+  ENDCASE
+  FOR i%=0 TO 600
+    theta=nf*t+RAD (i%)
+    POINT 340+i%, 512+na*SINtheta
+  NEXT
+  t=t+dt
+  CLS
+UNTIL FALSE
