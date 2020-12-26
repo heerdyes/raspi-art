@@ -69,6 +69,6 @@ void draw(){
   b.draw();
   bf=20.0f+b.x;
   for(int i=0;i<sc;i++){
-    freqs[i].setValue(bf*float(i+1)*(b.y/height));
+    freqs[i].setValue(bf*float(i+10)*(b.y/height));
   }
 }

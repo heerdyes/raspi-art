@@ -8,7 +8,7 @@ interface Brush{
 }
 
 class MadBrush implements Brush{
-  void touch(){
+  public void touch(){
     float t=frameCount*0.5;
     float tx=mouseX+r*cos(t);
     float ty=mouseY+r*sin(t);
@@ -25,7 +25,7 @@ class MadBrush implements Brush{
 class ShadowBrush implements Brush{
   float angle=45.0;
   
-  void touch(){
+  public void touch(){
     float t=frameCount*0.5;
     float x=frameCount*0.05;
     stroke(100+100*sin(x),255,0,70);
@@ -46,7 +46,7 @@ class PowderBrush implements Brush{
   int radius=3;
   int alpha=15;
   
-  void touch(){
+  public void touch(){
     stroke(0,255,0,alpha);
     for(int i=0;i<reps;i++){
       float rr=noise(mouseX,mouseY)*radius;
@@ -61,6 +61,7 @@ class PowderBrush implements Brush{
 
 int brush_index=0;
 Brush[] brushes=new Brush[]{new MadBrush(),new ShadowBrush(),new PowderBrush()};
+PImage img;
 
 void setup(){
   size(800,600);
