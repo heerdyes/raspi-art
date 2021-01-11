@@ -56,6 +56,7 @@ float jump=1;
 float turn=1;
 int ctr=0;
 Pen p;
+float t=0.0;
 
 void setup(){
   size(800,600);
@@ -63,19 +64,23 @@ void setup(){
   colorMode(RGB,1.0);
   background(0);
   p=new Pen();
-  p.pencolor(new float[]{0.5,1.0,0.2,1.0});
+  p.pencolor(new float[]{0.5,1.0,0.2,0.4});
 }
 
 void draw(){
-  for(int i=0;i<2;i++){
-    p.fd(50);
-    p.lt(45);
-    p.fd(50);
-    p.lt(135);
-  }
-  p.bk(5);
+  p.fd(15*(1+sin(t)));
+  p.lt(10);
+  t+=0.01;
 }
 
 void mouseClicked(){
   saveFrame(String.format("rec/%s-####.png","jpen"));
 }
+
+void keyPressed(){
+  if(key=='q'){
+    println("bye");
+    exit();
+  }
+}
+

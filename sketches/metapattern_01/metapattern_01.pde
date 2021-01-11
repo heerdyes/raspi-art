@@ -138,11 +138,15 @@ Parameter mkparam(String line,String delim){
 
 void setup(){
   t=new Turtle();
-  size(800,600);
+  size(1280,720);
   smooth();
   colorMode(RGB,1.0);
   background(0);
-  String[] cfglines=loadStrings("cfg/tmp.cfg");
+  String cfgfile="cfg/tmp.cfg";
+  if(args!=null){
+    cfgfile=args[0];
+  }
+  String[] cfglines=loadStrings(cfgfile);
   rp=mkparam(cfglines[0]," ");
   gp=mkparam(cfglines[1]," ");
   bp=mkparam(cfglines[2]," ");

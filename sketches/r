@@ -1,1 +1,4 @@
-processing-java --sketch=$1 --run
+pdesketch=$1
+shift
+processing-java --sketch=$pdesketch --run "$@"
+
