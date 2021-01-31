@@ -1,7 +1,7 @@
 // java version of the fractal root whorl
 Whorl mainwhorl;
 
-// the binary root that grows
+// the ternary root that grows
 class Root{
   float x,y,r,br,lim,a,ba;
   Root ltroot,rtroot,mdroot;
