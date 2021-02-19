@@ -22,11 +22,14 @@ class Root{
     if(c<=0){
       return;
     }
+    float pr=0.75*r;
+    float x0=this.x+pr*cos(this.a);
+    float y0=this.y-pr*sin(this.a);
     float x1=this.x+this.r*cos(this.a);
     float y1=this.y-this.r*sin(this.a);
-    line(x,y,x1,y1);
-    this.ltroot=new Root(x1,y1,pow(1.05,pow(-1,c))*br*r,br,a+pow(-1,c)*ba,ba);
-    this.rtroot=new Root(x1,y1,pow(0.95,pow(-1,c+1))*br*r,br,a-pow(-1,c)*ba,ba);
+    line(x,y,x0,y0);
+    this.ltroot=new Root(x1,y1,br*r,br,a+pow(-1,c)*ba,ba);
+    this.rtroot=new Root(x1,y1,br*r,br,a-pow(-1,c)*ba,ba);
     this.mdroot=new Root(x1,y1,br*r,br,a+PI,ba);
     this.ltroot.grow(c-1);
     this.rtroot.grow(c-1);
