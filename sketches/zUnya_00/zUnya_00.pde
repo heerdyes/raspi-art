@@ -40,4 +40,7 @@ void draw(){
 
 void keyPressed(){
   println(keyCode);
+  if(key=='q'){
+    exit();
+  }
 }

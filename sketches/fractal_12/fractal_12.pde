@@ -85,7 +85,7 @@ class Branch{
   Pt[] draw(){
     float x1=x+r*cos(a);
     float y1=y-r*sin(a);
-    return shape("lline",x1,y1);
+    return shape("trizUla",x1,y1);
   }
 }
 
@@ -117,13 +117,14 @@ void initfrac04(float rd){
 }
 
 void setup(){
-  size(1280,720);
+  size(3200,3200);
   background(0);
-  stroke(255);
+  stroke(255,212);
+  strokeWeight(2);
   rectMode(CENTER);
   noFill();
   fq=new ArrayList<Branch>();
-  initfrac01(320);
+  initfrac01(720);
 }
 
 void growfrac00(){
@@ -162,9 +163,21 @@ void growfrac02(){
   fq.add(rb);
 }
 
+void growfrac03(){
+  if(fq.isEmpty()){ return; }
+  Branch b=fq.remove(0);
+  if(b.r<1){ return; }
+  Pt[] pts=b.draw();
+  float cf=1.0/2.0;
+  Branch lb=new Branch(pts[0].x,pts[0].y,b.r*0.75,b.a+cf*PI);
+  Branch rb=new Branch(pts[0].x,pts[0].y,b.r*0.25,b.a-cf*PI);
+  fq.add(lb);
+  fq.add(rb);
+}
+
 void draw(){
   if(!paused){
-    growfrac02();
+    growfrac03();
   }
 }
 
@@ -181,7 +194,7 @@ void keyPressed(){
   if(key=='q'){
     exit();
   }else if(key=='s'){
-    String fn=String.format("img/fractal_10_%s.png",rndstr(8));
+    String fn=String.format("img/fractal_12_%s.png",rndstr(8));
     println("saving to file: "+fn);
     save(fn);
   }else if(key=='c'){
