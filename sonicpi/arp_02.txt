@@ -1,0 +1,40 @@
+t=0.0
+
+set :non, 64
+
+live_loop :kAlacakra do
+  sleep 0.075
+  t+=0.075
+end
+
+live_loop :midi_trig do
+  non, v = sync "/midi/mpd218_midi_1/1/1/note_on"
+  x = sync "/midi/mpd218_midi_1/1/1/channel_pressure"
+  noff, vo = sync "/midi/mpd218_midi_1/1/1/note_off"
+  set :non, non
+  set :nonv, v
+  set :cp, x[0]
+  set :noff, noff
+end
+
+live_loop :arp00 do
+  use_synth :dsaw
+  n1=get[:non]
+  xa=0.3+0.2*Math.sin(3*t)
+  xf=60+20*Math.sin(0.75*t)
+  play n1,amp: xa,cutoff: xf
+  sleep 0.2
+  play (n1 + 7),amp: xa,cutoff: xf
+  sleep 0.2
+  play (n1 + 12),amp: xa,cutoff: xf
+  sleep 0.2
+  play (n1 + 19),amp: xa,cutoff: xf
+  sleep 0.2
+end
+
+live_loop :drm00 do
+  sample :drum_bass_hard,amp: 0.8
+  sleep 0.8
+  sample :drum_snare_hard,amp: 0.8
+  sleep 0.8
+end

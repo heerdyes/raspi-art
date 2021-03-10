@@ -1,0 +1,109 @@
+# mpd live groovebox
+# coded by zabdasambhava
+
+t=0.0
+
+set :non, 64
+set :drmon, false
+set :arpon, false
+set :csmon, false
+set :hhon, false
+set :kn1, 64
+set :kn2, 64
+set :kn3, 64
+set :kn4, 64
+set :kn5, 64
+set :kn6, 64
+
+live_loop :kAlacakra do
+  sleep 0.075
+  t+=0.075
+end
+
+live_loop :midi_trig do
+  non, v = sync "/midi/mpd218_midi_1/1/1/note_on"
+  x = sync "/midi/mpd218_midi_1/1/1/channel_pressure"
+  noff, vo = sync "/midi/mpd218_midi_1/1/1/note_off"
+  kn, kv = sync "/midi/mpd218_midi_1/1/1/control_change"
+  set :non, non
+  if non == 36 then
+    set :drmon, (not get[:drmon])
+  elsif non == 38 then
+    set :arpon, (not get[:arpon])
+  elsif non == 40 then
+    set :csmon, (not get[:csmon])
+  elsif non == 41 then
+    set :hhon, (not get[:hhon])
+  end
+  if kn == 3 then
+    set :kn1, kv
+  elsif kn == 9 then
+    set :kn2, kv
+  elsif kn == 12 then
+    set :kn3, kv
+  elsif kn == 13 then
+    set :kn4, kv
+  elsif kn == 14 then
+    set :kn5, kv
+  elsif kn == 15 then
+    set :kn6, kv
+  end
+  set :nonv, v
+  set :cp, x[0]
+  set :noff, noff
+end
+
+live_loop :arp00 do
+  use_synth :dsaw
+  if get[:arpon] then
+    n1=48
+    play n1,amp: 0.5,cutoff: get[:kn1],attack: 0.05,decay: 0.1,release: 0.0,sustain: 0.0
+    sleep 0.2
+    play (n1 + 7),amp: 0.5,cutoff: get[:kn1],attack: 0.05,decay: 0.1,release: 0.0,sustain: 0.0
+    sleep 0.2
+    play (n1 + 12),amp: 0.5,cutoff: get[:kn1],attack: 0.05,decay: 0.1,release: 0.0,sustain: 0.0
+    sleep 0.2
+    play (n1 + 19),amp: 0.5,cutoff: get[:kn1],attack: 0.05,decay: 0.1,release: 0.0,sustain: 0.0
+    sleep 0.2
+  else
+    sleep 0.8
+  end
+end
+
+live_loop :drm00 do
+  if get[:drmon] then
+    sample :drum_bass_hard,amp: 0.8
+    sleep 0.8
+    sample :drum_snare_hard,amp: 0.8
+    sleep 0.8
+  else
+    sleep 1.6
+  end
+end
+
+live_loop :csmradn do
+  if get[:csmon] then
+    with_fx :reverb,mix: 0.5 do
+      s=synth :bnoise, amp: 0.75, sustain: rrand(0.02,0.6), attack: rrand(0,2)
+      control s, pan: rrand(-1,1), cutoff: rrand(50,100)
+      sleep 3.2
+    end
+  else
+    sleep 3.2
+  end
+end
+
+live_loop :hh00 do
+  if get[:hhon] then
+    sample :drum_cymbal_closed,amp: 0.5
+    sleep 0.2
+    sample :drum_cymbal_open,amp: 0.45
+    sleep 0.4
+    sample :drum_cymbal_closed,amp: 0.5
+    sleep 0.1
+    sample :drum_cymbal_closed,amp: 0.4
+    sleep 0.1
+  else
+    sleep 0.8
+  end
+end

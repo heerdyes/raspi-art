@@ -1,0 +1,33 @@
+t=0.0
+
+set :non, 64
+
+live_loop :kAlacakra do
+  sleep 0.1
+  t+=0.1
+end
+
+live_loop :midi_trig do
+  non, v = sync "/midi/mpd218_midi_1/1/1/note_on"
+  x = sync "/midi/mpd218_midi_1/1/1/channel_pressure"
+  noff, vo = sync "/midi/mpd218_midi_1/1/1/note_off"
+  set :non, non
+  
+  set :nonv, v
+  set :cp, x[0]
+  set :noff, noff
+end
+
+live_loop :arp00 do
+  use_synth :dsaw
+  n1=get[:non]
+  xa=0.5*(1+Math.sin(t))
+  play n1,amp: xa
+  sleep 0.2
+  play (n1 + 7),amp: xa
+  sleep 0.2
+  play (n1 + 12),amp: xa
+  sleep 0.2
+  play (n1 + 19),amp: xa
+  sleep 0.2
+end
