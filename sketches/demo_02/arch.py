@@ -25,3 +25,12 @@ class Pub:
 class Sub:
     def __init__(self,callback):
         self.receive=callback
+        
+class Binode:
+    def __init__(self):
+        self.a=None
+        self.b=None
+        self.up=None
+    
+    def rm(self):
+        pass
