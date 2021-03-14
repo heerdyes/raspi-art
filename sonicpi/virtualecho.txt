@@ -1,0 +1,21 @@
+# Welcome to Sonic Pi v2.10
+
+t = 0.0
+
+live_loop :heartbeat do
+  t = t + 0.075
+  sleep 0.075
+end
+
+live_loop :flibble do
+  4.times do
+    sample :bd_haus, rate: 1,amp: (0.5 * (1 + Math.sin(t)))
+    sleep 0.25
+  end
+  use_synth :cnoise
+  4.times do
+    cf = 70.0 + 30.0 * Math.sin(2 * t)
+    play 64,release: 0.1,cutoff_frequency: cf
+    sleep 0.25
+  end
+end
