@@ -1,0 +1,88 @@
+set :tu, 0.125
+set :drm, 0
+set :bas, 0
+set :cho, 0
+set :arp, 0
+
+# all seq tracks must respect bar duration
+bardur = get[:tu] * 16
+
+define :drm0 do
+  sample :drum_bass_hard
+  sleep 4*get[:tu]
+  sample :drum_snare_hard
+  sleep 4*get[:tu]
+  sample :drum_bass_soft
+  sleep 4*get[:tu]
+  sample :drum_snare_hard
+  sleep 4*get[:tu]
+end
+
+live_loop :drmseq do
+  if get[:drm]==0 then
+    drm0
+  else
+    sleep bardur
+  end
+end
+
+define :initdrm do |n,v|
+  if n==36 then
+    set :drm, 0
+  elsif n==38 then
+    set :drm, 1
+  elsif n==40 then
+    set :drm, 2
+  elsif n==41 then
+    set :drm, 3
+  end
+end
+
+define :initbas do |n,v|
+  if n==43 then
+    set :bas, 0
+  elsif n==45 then
+    set :bas, 1
+  elsif n==47 then
+    set :bas, 2
+  elsif n==48 then
+    set :bas, 3
+  end
+end
+
+define :initcho do |n,v|
+  if n==50 then
+    set :cho, 0
+  elsif n==52 then
+    set :cho, 1
+  elsif n==53 then
+    set :cho, 2
+  elsif n==55 then
+    set :cho, 3
+  end
+end
+
+define :initarp do |n,v|
+  if n==57 then
+    set :arp, 0
+  elsif n==59 then
+    set :arp, 1
+  elsif n==60 then
+    set :arp, 2
+  elsif n==62 then
+    set :arp, 3
+  end
+end
+
+live_loop :mpdctrl do
+  n,v = sync "/midi/mpd218_midi_1/1/1/note_on"
+  if [36,38,40,41].include? n then
+    initdrm n,v
+  elsif [43,45,47,48].include? n then
+    trigbass n,v
+  elsif [50,52,53,55].include? n then
+    trigchord n,v
+  elsif [57,59,60,62].include? n then
+    trigarp n,v
+  end
+end
