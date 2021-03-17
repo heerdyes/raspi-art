@@ -1,0 +1,37 @@
+# Welcome to Sonic Pi v2.10
+
+live_loop :flibble do
+  ed = 4
+  4.times do
+    sample :bd_haus, rate: 1,amp: (ed * 0.15)
+    ed = ed - 1
+    sleep 0.25
+  end
+  use_synth :cnoise
+  ed = 4
+  4.times do
+    play 64,release: 0.1,amp: (ed * 0.15),cutoff: (ed * 10 + 60)
+    ed = ed - 1
+    sleep 0.25
+  end
+end
+
+live_loop :tron00 do
+  use_synth :prophet
+  play 40,release: 0.24,cutoff: 60
+  sleep 0.25
+  play 47,release: 0.24,cutoff: 64
+  sleep 0.25
+  play 48,release: 0.24,cutoff: 68
+  sleep 0.25
+  play 47,release: 0.24,cutoff: 64
+  sleep 0.25
+  play 40,release: 0.24,cutoff: 64
+  sleep 0.25
+  play 52,release: 0.24,cutoff: 72
+  sleep 0.25
+  play 48,release: 0.24,cutoff: 68
+  sleep 0.25
+  play 47,release: 0.24,cutoff: 64
+  sleep 0.25
+end

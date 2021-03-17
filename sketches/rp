@@ -1,0 +1,4 @@
+pdesketch=$1
+shift
+processing-java --sketch=$pdesketch --present "$@"
+

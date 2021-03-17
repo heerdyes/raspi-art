@@ -1,0 +1,25 @@
+# Welcome to Sonic Pi v2.10
+
+ed = 4
+
+live_loop :flibble do
+  ed = 4
+  4.times do
+    sample :bd_haus, rate: 1,amp: (ed * 0.15)
+    ed = ed - 1
+    if ed <= 0 then
+      ed = 4
+    end
+    sleep 0.25
+  end
+  use_synth :cnoise
+  ed = 4
+  4.times do
+    play 64,release: 0.1,amp: (ed * 0.15)
+    ed = ed - 1
+    if ed <= 0 then
+      ed = 4
+    end
+    sleep 0.25
+  end
+end
