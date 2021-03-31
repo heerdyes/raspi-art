@@ -1,0 +1,167 @@
+set :tu, 0.125
+set :drm, 0
+set :bas, 0
+set :cho, 0
+set :arp, 0
+set :damp, 0.4
+set :bamp, 0.4
+set :camp, 0.4
+set :aamp, 0.4
+
+# all seq tracks must respect bar duration
+bardur = get[:tu] * 16
+
+# sonic sequence functions
+define :drm0 do
+  sample :drum_bass_hard,amp: get[:damp]
+  sleep 4*get[:tu]
+  sample :drum_snare_hard,amp: get[:damp]
+  sleep 4*get[:tu]
+  sample :drum_bass_soft,amp: get[:damp]
+  sleep 4*get[:tu]
+  sample :drum_snare_hard,amp: get[:damp]
+  sleep 4*get[:tu]
+end
+
+define :drm1 do
+  4.times do
+    sample :drum_bass_soft,amp: get[:damp]
+    4.times do
+      sample :drum_cymbal_closed,amp: get[:damp]
+      sleep get[:tu]
+    end
+  end
+end
+
+define :bas0 do
+  use_synth :saw
+  play 40,release: get[:tu],amp: get[:bamp]
+  sleep get[:tu]
+  play 42,release: get[:tu],amp: get[:bamp]
+  sleep get[:tu]
+  play 42,release: get[:tu],amp: get[:bamp]
+  sleep 2*get[:tu]
+  sleep 8*get[:tu]
+  play 42,release: get[:tu],amp: get[:bamp]
+  sleep get[:tu]
+  play 42,release: get[:tu],amp: get[:bamp]
+  sleep get[:tu]
+  sleep 2*get[:tu]
+end
+
+define :bas1 do
+  use_synth :dsaw
+  play 42,release: get[:tu],amp: get[:bamp]
+  sleep get[:tu]
+  play 42,release: get[:tu],amp: get[:bamp]
+  sleep get[:tu]
+  sleep 2*get[:tu]
+  play 42,release: get[:tu],amp: get[:bamp]
+  sleep 3*get[:tu]
+  play 42,release: get[:tu],amp: get[:bamp]
+  sleep get[:tu]
+  sleep 4*get[:tu]
+  play 42,release: get[:tu],amp: get[:bamp]
+  sleep get[:tu]
+  play 42,release: get[:tu],amp: get[:bamp]
+  sleep get[:tu]
+  sleep 2*get[:tu]
+end
+
+# trigger init functions
+define :initdrm do |n,v|
+  if n==36 then
+    set :drm, 0
+  elsif n==38 then
+    set :drm, 1
+  elsif n==40 then
+    set :drm, 2
+  elsif n==41 then
+    set :drm, 3
+  end
+end
+
+define :initbas do |n,v|
+  if n==43 then
+    set :bas, 0
+  elsif n==45 then
+    set :bas, 1
+  elsif n==47 then
+    set :bas, 2
+  elsif n==48 then
+    set :bas, 3
+  end
+end
+
+define :initcho do |n,v|
+  if n==50 then
+    set :cho, 0
+  elsif n==52 then
+    set :cho, 1
+  elsif n==53 then
+    set :cho, 2
+  elsif n==55 then
+    set :cho, 3
+  end
+end
+
+define :initarp do |n,v|
+  if n==57 then
+    set :arp, 0
+  elsif n==59 then
+    set :arp, 1
+  elsif n==60 then
+    set :arp, 2
+  elsif n==62 then
+    set :arp, 3
+  end
+end
+
+# akai mpd monitor live loop
+live_loop :mpdctrl do
+  n,v = sync "/midi/mpd218_midi_1/1/1/note_on"
+  kn,kv = sync "/midi/mpd218_midi_1/1/1/control_change"
+  # handle volumes
+  puts "just a test"
+  if kn==3 then
+    puts 'drum volume set to #{kv / 127.0}'
+    set :damp, (kv / 127.0)
+  elsif kn==9 then
+    set :bamp, (kv / 127.0)
+  elsif kn==12 then
+    set :camp, (kv / 127.0)
+  elsif kn==13 then
+    set :aamp, (kv / 127.0)
+  end
+  # init sequencer triggers
+  if [36,38,40,41].include? n then
+    initdrm n,v
+  elsif [43,45,47,48].include? n then
+    initbas n,v
+  elsif [50,52,53,55].include? n then
+    initcho n,v
+  elsif [57,59,60,62].include? n then
+    initarp n,v
+  end
+end
+
+# live loops
+live_loop :drmseq do
+  if get[:drm]==0 then
+    drm0
+  elsif get[:drm]==1 then
+    drm1
+  else
+    sleep bardur
+  end
+end
+
+live_loop :basseq do
+  if get[:bas]==0 then
+    bas0
+  elsif get[:bas]==1 then
+    bas1
+  else
+    sleep bardur
+  end
+end

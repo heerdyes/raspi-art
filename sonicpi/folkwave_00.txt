@@ -1,0 +1,236 @@
+# created by wavesmith (hm)
+# mridangam inspired
+
+tu=0.15
+
+set :dhim,false
+set :tak,false
+set :arp,0
+set :arpvol,0.0
+set :takvol,0.2
+set :ambvol,0.0
+set :amb,0
+
+# ----------- #
+# instruments
+# ----------- #
+define :tak00 do |p,t,a|
+  synth :cnoise,note: p,release: 0.05,amp: a
+  sleep t
+end
+
+define :dhim00 do |p,t,a|
+  synth :fm,note: p,release: 0.15,amp: a
+  synth :fm,note: p-0.1,release: 0.10,amp: a*0.8
+  synth :fm,note: p+24.1,release: 0.18,amp: a*0.2
+  synth :sine,note: p+19.08,release: 0.16,amp: a*0.25
+  sleep t
+end
+
+define :dhim01 do |p,t,a|
+  synth :fm,note: p,release: 0.15,amp: a
+  synth :fm,note: p-0.1,release: 0.10,amp: a*0.6
+  synth :pluck,note: p+24.1,release: 0.18,amp: a*0.4
+  sleep t
+end
+
+define :nada00 do |p,t,a|
+  synth :prophet,note: p+24.1,amp: 0.4*a,release: 0.08,cutoff: 90
+  synth :saw,note: p,amp: a,attack: 0.1,release: 0.6*t,cutoff: 60
+  synth :saw,note: p+12.1,amp: 0.7*a,attack: 0.1,release: 0.2*t,cutoff: 50
+  sleep t
+end
+
+define :nada01 do |p,t,a|
+  synth :dsaw,note: p,amp: a,release: 0.1,cutoff: 60
+  sleep t
+end
+
+define :amb00 do |p,t,a|
+  synth :blade,note: p,amp: a,release: 0.6*t,attack: 0.4*t
+  synth :sine,amp: 0.4*a,note: p+12.1,release: 0.3*t,attack: 0.7*t
+  synth :sine,amp: 0.3*a,note: p+23.9,release: 0.3*t,attack: 0.7*t
+  synth :blade,note: p-12.08,amp: 0.5*a,release: 0.7*t,attack: 0.3*t
+  sleep t
+end
+
+# ----------------------- #
+# orchestration functions
+# ----------------------- #
+
+define :ambseq00 do |p|
+  amb00 p,32*tu,get[:ambvol]
+end
+
+define :nadaseq00 do
+  5.times do
+    nada00 :e3,tu,get[:arpvol]
+    nada00 :g3,tu,get[:arpvol]
+    sleep tu
+  end
+  sleep tu
+end
+
+define :nadaseq01 do |a,b,c|
+  5.times do
+    nada01 a,tu,get[:arpvol]
+    nada01 b,tu,get[:arpvol]
+    nada01 c,tu,get[:arpvol]
+  end
+  sleep tu
+end
+
+define :takseq00 do
+  3.times do
+    tak00 :e4,tu,get[:takvol]
+    tak00 :e3,tu,0.45*get[:takvol]
+    tak00 :e3,tu,0.45*get[:takvol]
+  end
+  tak00 :e3,tu,0.45*get[:takvol]
+  2.times do
+    tak00 :e4,tu,get[:takvol]
+    tak00 :e3,tu,0.45*get[:takvol]
+  end
+  tak00 :e3,tu,0.45*get[:takvol]
+  tak00 :e3,tu,0.45*get[:takvol]
+end
+
+define :dhimseq00 do
+  dhim00 :e2,tu,0.9
+  sleep 2*tu
+  dhim00 :e2,tu,rrand(0.6,0.9)
+  sleep 4*tu
+  sleep tu
+  dhim00 :e2,tu,0.9
+  sleep 2*tu
+  dhim00 :e2,tu,rrand(0.6,0.9)
+  sleep 3*tu
+end
+
+define :dhimseq01 do |a1,a2|
+  dhim00 :e2,tu,rrand(a1,a2)
+  sleep tu
+  dhim01 :e2,tu,rrand(a1,a2)
+  dhim01 :e2,tu,rrand(a1,a2)
+  sleep tu
+  dhim00 :e2,tu,rrand(a1,a2)
+  sleep tu
+  dhim00 :e2,tu,rrand(a1,a2)
+  sleep tu
+  sleep tu
+  dhim01 :e2,tu,rrand(a1,a2)
+  sleep tu
+  dhim00 :e2,tu,rrand(a1,a2)
+  dhim01 :e2,tu,rrand(a1,a2)
+  sleep tu
+  dhim00 :e2,tu,rrand(a1,a2)
+end
+# --------------------------- #
+# orchestration functions end
+# --------------------------- #
+
+# --------------------- #
+# akai pad sensor loops
+# --------------------- #
+live_loop :padsensor do
+  n,v = sync "/midi/mpd218_midi_1/1/1/note_on"
+  if n==36 then
+    set :dhim, (not get[:dhim])
+  elsif n==38 then
+    set :tak, (not get[:tak])
+  elsif n==43 then
+    set :amb, 0
+  elsif n==45 then
+    set :amb, 1
+  elsif n==47 then
+    set :amb, 2
+  elsif n==48 then
+    set :amb, 3
+  elsif n==57 then
+    set :arp, 0
+  elsif n==59 then
+    set :arp, 1
+  elsif n==60 then
+    set :arp, 2
+  elsif n==62 then
+    set :arp, 3
+  elsif n==50 then
+    set :arp, 4
+  elsif n==52 then
+    set :arp, 5
+  elsif n==53 then
+    set :arp, 6
+  elsif n==55 then
+    set :arp, 7
+  end
+end
+
+live_loop :knobsensor do
+  k,v = sync "/midi/mpd218_midi_1/1/1/control_change"
+  if k==3 then
+    set :arpvol, (v / 127.0)
+  elsif k==14 then
+    set :ambvol, (v / 127.0)
+  elsif k==15 then
+    set :takvol, (v / 127.0)
+  end
+end
+
+# music live loops
+live_loop :dhimloop00 do
+  if get[:dhim] then
+    dhimseq01 0.7,0.9
+  else
+    sleep 16*tu
+  end
+end
+
+with_fx :reverb,mix: 0.3 do
+  with_fx :hpf,cutoff: 90 do
+    live_loop :takloop00 do
+      if get[:tak] then
+        takseq00
+      else
+        sleep 16*tu
+      end
+    end
+  end
+end
+
+live_loop :arploop do
+  if get[:arp]==0 then
+    nadaseq01 :e3,:g3,:b3
+  elsif get[:arp]==1 then
+    nadaseq01 :d3,:g3,:b3
+  elsif get[:arp]==2 then
+    nadaseq01 :c3,:e3,:g3
+  elsif get[:arp]==3 then
+    nadaseq01 :a2,:c3,:e3
+  elsif get[:arp]==4 then
+    nadaseq01 :b2,:ds3,:g3
+  elsif get[:arp]==5 then
+    nadaseq01 :b2,:ds3,:fs3
+  elsif get[:arp]==6 then
+    nadaseq01 :g3,:b3,:d4
+  elsif get[:arp]==7 then
+    nadaseq01 :fs3,:b3,:d4
+  else
+    sleep 16*tu
+  end
+end
+
+with_fx :slicer,mix: 0.75,phase: 0.42 do
+  live_loop :ambloop do
+    if get[:amb]==0 then
+      ambseq00 :e3
+    elsif get[:amb]==1 then
+      ambseq00 :fs3
+    elsif get[:amb]==2 then
+      ambseq00 :g3
+    elsif get[:amb]==3 then
+      ambseq00 :a3
+    else
+      sleep 32*tu
+    end
+  end
+end
