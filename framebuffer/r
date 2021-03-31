@@ -1,5 +1,5 @@
 #!/bin/sh
 set -e
 gcc fbzero.c -o fbzero -lm
-./fbzero
+sudo ./fbzero
 
