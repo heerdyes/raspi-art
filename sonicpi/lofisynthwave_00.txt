@@ -1,0 +1,69 @@
+define :sinepad do |p,t,a|
+  synth :sine,note: p,amp: 0.27*a,release: 0.3*t,attack: 0.6*t,sustain: 0.1*t
+  synth :sine,note: p+0.08,amp: 0.27*a,release: 0.3*t,attack: 0.6*t,sustain: 0.1*t
+  synth :saw,note: p,amp: 0.25*a,release: 0.3*t,attack: 0.6*t,sustain: 0.1*t,cutoff: 62
+end
+
+define :fmsqbass do |p,a|
+  use_synth :fm
+  play p,amp: rrand(0.6,0.9)*a,release: 0.25,attack: 0.0,cutoff: 60
+  use_synth :supersaw
+  play p+0.02,amp: rrand(0.6,0.9)*a,release: 0.25,attack: 0.0,cutoff: 60
+end
+
+define :modnoise do |p,t,a,n|
+  sp=synth :cnoise,note: p,amp: 0.21*a,release: 0.3*t,attack: 0.6*t,sustain: 0.1*t,cutoff: 110,cutoff_slide: (t / 16.0)
+  16.times do |i|
+    control sp,cutoff: (if i%2==0 then 50 else 90 end)
+    if i%n==0 then
+      fmsqbass p-12,a
+    end
+    sleep (t / 16.0)
+  end
+end
+
+define :modpad11 do |nlist,t,a|
+  nlist.each do |n|
+    sinepad n,t,a
+  end
+  modnoise nlist[0],t,a,2
+end
+
+define :lofiprog do
+  modpad11 [:c4,:e4,:g4,:b4],3.2,0.8
+  modpad11 [:b3,:d4,:fs4,:a4],3.2,0.8
+  modpad11 [:e4,:g4,:b4,:d4],3.2,0.8
+  modpad11 [:e4,:fs4,:g4,:b4],3.2,0.8
+end
+
+define :bd do |t,a,n|
+  sample :drum_bass_soft,amp: a
+  sleep t
+end
+
+define :sn do |t,a|
+  sample :drum_cymbal_pedal,release: 0.5*t,amp: a
+  sleep t
+end
+
+define :lofibeat do |a|
+  bd 0.4,a,42
+  sn 0.4,rrand(0.6,0.9)*a
+  sn 0.4,rrand(0.6,0.9)*a
+  bd 0.2,a,49
+  bd 0.4,a,42
+  sn 0.4,rrand(0.6,0.9)*a
+  sn 0.2,rrand(0.6,0.9)*a
+  sn 0.4,rrand(0.6,0.9)*a
+  bd 0.4,a,42
+end
+
+live_loop :lofibeatloop do
+  lofibeat 0.9
+end
+
+with_fx :reverb,mix: 0.36 do
+  live_loop :lofiprogloop do
+    lofiprog
+  end
+end

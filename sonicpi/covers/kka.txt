@@ -1,0 +1,548 @@
+# created by wavesmith (heerdyesmahapatro)
+# kabhi kabhi aditi
+
+tu=0.170
+
+# live variables
+set :bd,false
+set :bdvol,0.2
+set :basvol,0.2
+set :tak,false
+set :takvol,0.2
+set :m32,false
+set :m32vol,0.0
+set :m33,false
+set :m33vol,0.0
+set :part,-1
+set :prevpart,-1
+set :arpvol,0.2
+set :strvol,0.3
+set :padstate,0
+set :midirobot,false
+
+# attribute variables
+B='bassline'
+S='strings'
+A='arpeggio'
+
+# parts definition
+intro      = {B=>-1,S=>-1,A=>0}
+chorus     = {B=>0, S=>0, A=>1}
+transition = {B=>2, S=>2, A=>3}
+jamgap     = {B=>0, S=>0, A=>0}
+verse      = {B=>1, S=>1, A=>2}
+# arrangement definition
+parts=[intro,chorus,transition,verse,jamgap]
+
+# pad part indexing
+padnum=[57,59,60,62,
+        50,52,53,55,
+        43,45,47,48]
+partnum={57=>0,59=>1,60=>2,62=>3,
+         50=>4,52=>5,53=>6,55=>7,
+         43=>8,45=>9,47=>10,48=>11}
+
+# ----------- #
+# instruments
+# ----------- #
+define :sinepad do |p,t,a|
+  synth :sine,note: p,amp: 0.27*a,release: 0.1*t,attack: 0.8*t,sustain: 0.1*t
+  synth :sine,note: p+0.08,amp: 0.27*a,release: 0.1*t,attack: 0.8*t,sustain: 0.1*t
+  synth :saw,note: p,amp: 0.25*a,release: 0.1*t,attack: 0.8*t,sustain: 0.1*t,cutoff: 62
+end
+
+define :modnoise do |p,t,a|
+  sp=synth :cnoise,note: p,amp: 0.21*a,release: 0.1*t,attack: 0.8*t,sustain: 0.1*t,cutoff: 110,cutoff_slide: (t / 16.0)
+  16.times do |i|
+    control sp,cutoff: (if i%2==0 then 50 else 90 end)
+    sleep (t / 16.0)
+  end
+end
+
+define :modpad11 do |nlist,t,a|
+  nlist.each do |n|
+    sinepad n,t,a
+  end
+  modnoise nlist[0],t,a
+end
+
+define :tak00 do |p,t,a|
+  synth :cnoise,note: p,release: 0.05,amp: a
+  sleep t
+end
+
+define :bd00 do |t,a|
+  sample :drum_bass_hard,amp: a
+  sleep t
+end
+
+define :synbas00 do |p,t,a|
+  synth :saw,note: p,amp: a,attack: 0.1,release: 0.2*t,cutoff: 60
+  synth :square,note: p-11.9,amp: 0.4*a,attack: 0.075,release: 0.15*t,cutoff: 50
+  sleep t
+end
+
+define :synbas01 do |p,t,a|
+  synth :fm,note: p,amp: 0.9*a,release: 0.6*t,attack: 0.0,cutoff: 100
+  synth :fm,note: p+0.1,amp: 0.4*a,release: 0.4*t,attack: 0.0,cutoff: 100
+  synth :tri,note: p-11.95,amp: 0.32*a,attack: 0.045,release: 0.5*t,attack: 0.0,cutoff: 75
+  synth :sine,note: p+0.04,amp: 0.3*a,attack: 0.045,release: 0.95*t,attack: 0.0,cutoff: rrand(80,100)
+  sleep t
+end
+
+define :nada00 do |p,t,a|
+  synth :prophet,note: p+24.1,amp: 0.4*a,release: 0.08,cutoff: 90
+  synth :saw,note: p,amp: a,attack: 0.1,release: 0.6*t,cutoff: 60
+  synth :saw,note: p+12.1,amp: 0.7*a,attack: 0.1,release: 0.2*t,cutoff: 50
+  sleep t
+end
+
+define :nada01 do |p,t,a|
+  synth :dsaw,note: p,amp: a,release: 0.1,cutoff: 60
+  sleep t
+end
+
+define :str00 do |p,t,a|
+  synth :prophet,note: p-12.05,amp: a,release: 0.5*t,attack: 0.2*t,sustain: 0.3*t,cutoff: 55
+  synth :saw,note: p,amp: a,attack: 0.1*t,release: 0.4*t,sustain: 0.5*t,cutoff: 60
+  sleep t
+end
+
+define :str01 do |p,t,a|
+  synth :blade,note: p+7,amp: 0.5*a,release: 0.5*t,attack: 0.1*t,sustain: 0.3*t,cutoff: 55
+  synth :tri,note: p,amp: 0.3*a,attack: 0.05*t,release: 0.2*t,sustain: 0.4*t,cutoff: 80
+  synth :dsaw,note: p,amp: 0.7*a,attack: 0.075*t,release: 0.4*t,sustain: 0.5*t,cutoff: 50
+  synth :cnoise,amp: 0.1*a,attack: 0.2*t,sustain: 0.4*t,release: 0.2*t,cutoff: 80
+  sleep t
+end
+
+define :hmflute do |p,t,a|
+  synth :sine,note: p,attack: 0.2*t,sustain: 0.7*t,release: 0.1*t,amp: a
+  synth :sine,note: p+12.1,attack: 0.1*t,sustain: 0.2*t,release: 0.2*t,amp: 0.5*a
+  synth :sine,note: p+24.1,attack: 0.05*t,sustain: 0.1*t,release: 0.1*t,amp: 0.25*a
+  synth :cnoise,note: p,attack: 0.02,release: 0.1,amp: rrand(0.05,0.14)*a
+  sleep t
+end
+
+define :modstr15 do |p,t,a|
+  sp1=synth :dsaw,note: p-5,amp: 0.5*a,release: 0.1*t,attack: 0.2*t,sustain: 0.4*t,cutoff: 100,cutoff_slide: (t / 16.0)
+  sp2=synth :saw,note: p,amp: 0.5*a,release: 0.1*t,attack: 0.2*t,sustain: 0.4*t,cutoff: 100,cutoff_slide: (t / 16.0)
+  16.times do |i|
+    control sp1,cutoff: (if i%2==0 then 60 else 100 end)
+    control sp2,cutoff: (if i%2==0 then 70 else 100 end)
+    sleep (t / 16.0)
+  end
+end
+# ----------------------- #
+# orchestration functions
+# ----------------------- #
+define :bassptn00 do |p|
+  synbas01 p,tu,rrand(0.7,0.9)
+  sleep 2*tu
+  synbas01 p,tu,rrand(0.7,0.9)
+  sleep 4*tu
+end
+
+define :bassptn01 do |p,px|
+  synbas01 p,tu,rrand(0.7,0.9)
+  sleep 2*tu
+  synbas01 p,tu,rrand(0.7,0.9)
+  sleep 3*tu
+  synbas01 px,tu,rrand(0.7,0.9)
+end
+
+# pass a list of root notes for long basslines
+define :bassmetaptn do |ns|
+  ns.each do |n|
+    bassptn00 n
+  end
+end
+
+# length 4x4 -> 16
+define :arpreps do |notes,rpt,t,vol|
+  rpt.times do
+    notes.each do |p|
+      nada01 p,t,vol
+    end
+  end
+end
+
+# length 4+4 -> 8, 4 note upwards arpeggio
+define :chordarp00 do |notes,t,vol|
+  if notes.length==4 then
+    notes.each do |p|
+      nada01 p,t,vol
+    end
+  else
+    puts 'exactly 4 notes expected! going to sleep.'
+    sleep 4*t
+  end
+  sleep 4*t
+end
+
+# length 2x16 -> 32
+define :arpseq02 do
+  arpreps [:a3,:b3,:c4,:e4],4,tu,get[:arpvol]
+  arpreps [:d4,:e4,:f4,:a4],4,tu,get[:arpvol]
+end
+
+# 8 bars
+define :chorusarp do
+  3.times do
+    arpreps [:a3,:b3,:c4,:e4],4,tu,get[:arpvol]
+    arpreps [:d4,:e4,:f4,:a4],4,tu,get[:arpvol]
+  end
+  arpreps [:g3,:a3,:b3,:c4],4,tu,get[:arpvol]
+  arpreps [:a3,:b3,:c4,:e4],4,tu,get[:arpvol]
+end
+
+# --- verse lines --- #
+define :versemetaarp do |chordlist|
+  chordlist.each do |c|
+    if c.length==0 then
+      sleep 8*tu
+    else
+      chordarp00 c,tu,get[:arpvol]
+    end
+  end
+end
+
+# length 8x4 -> 32
+define :verseln04 do
+  versemetaarp [
+    [:bb3,:d4,:f4,:g4],
+    [:d3,:d4,:f4,:a4]
+  ]
+  nada01 :g3,0,0.75
+  chordarp00 [:e3,:gs3,:b3,:d4],tu,get[:arpvol]
+  sleep 8*tu
+end
+
+# length: 32x5 -> 160 -> 10 bars
+define :versechords do
+  versemetaarp [
+    [:c4,:d4,:e4,:g4],
+    [:g3,:a3,:b3,:d4],
+    [:c4,:e4,:g4,:b4],
+    []
+  ]
+  versemetaarp [
+    [:f3,:g3,:a3,:c4],
+    [:g3,:a3,:b3,:d4],
+    [:c4,:e4,:g4,:b4],
+    []
+  ]
+  versemetaarp [
+    [:a3,:b3,:c3,:e4],
+    [:e3,:fs3,:g3,:b3],
+    [:d3,:e3,:f3,:a3],
+    [:a3,:cs4,:e4,:g4]
+  ]
+  versemetaarp [
+    [:d4,:e4,:f4,:a4],
+    [:c4,:e4,:f4,:a4],
+    [:b3,:d4,:f4,:g4],
+    []
+  ]
+  verseln04
+end
+
+define :chorusbass do
+  3.times do
+    bassmetaptn [:a3,:a3,:d3,:d3]
+  end
+  bassmetaptn [:g3,:g3,:a3]
+  bassptn01 :a3,:e3
+end
+
+define :versebass do
+  bassmetaptn [:c3,:g2,:e3,:e3]
+  bassmetaptn [:f3,:g3,:a2,:a2]
+  bassmetaptn [:f3,:g3,:c3,:c3]
+  bassmetaptn [:d3,:c3,:b2,:g2]
+  bassmetaptn [:bb2,:g2,:e3,:e3]
+end
+
+# length 32x5 -> 10 bars
+define :versestr do
+  # Cmaj9 Gmaj9 C7
+  modpad11 [:c4,:d4,:e4,:g4],8*tu,0.8
+  modpad11 [:g4,:a4,:b4,:d4],8*tu,0.8
+  modpad11 [:c4,:e4,:g4,:b4],16*tu,0.8
+  # Fmaj9 Gmaj9 C7
+  modpad11 [:f4,:g4,:a4,:c4],8*tu,0.8
+  modpad11 [:g4,:a4,:b4,:d4],8*tu,0.8
+  modpad11 [:c4,:e4,:g4,:b4],16*tu,0.8
+  # Am9 Em9 Dm9 A7
+  modpad11 [:a4,:b4,:c4,:e4],8*tu,0.8
+  modpad11 [:e4,:fs4,:g4,:b4],8*tu,0.8
+  modpad11 [:d4,:e4,:f4,:a4],8*tu,0.8
+  modpad11 [:a4,:cs4,:e4,:g4],8*tu,0.8
+  # Dm9 Cm9(sus4) Bm6
+  modpad11 [:d4,:e4,:f4,:a4],8*tu,0.8
+  modpad11 [:c4,:e4,:f4,:a4],8*tu,0.8
+  modpad11 [:b3,:d4,:f4,:g4],16*tu,0.8
+  # Bbmaj7(11,13) Dm E7(#9)
+  modpad11 [:bb3,:d4,:f4,:g4],8*tu,0.8
+  modpad11 [:d4,:f4,:a4],8*tu,0.8
+  modpad11 [:e4,:fs4,:g4,:b4],16*tu,0.8
+end
+
+define :takseq00 do
+  2.times do
+    sleep 3*tu
+    tak00 :c4,tu,get[:takvol]
+    sleep 2*tu
+    tak00 :c4,2*tu,get[:takvol]
+  end
+end
+
+define :bdseq00 do |a1,a2|
+  2.times do
+    bd00 3*tu,rrand(a1,a2)
+    bd00 tu,rrand(a1,a2)
+    sleep 4*tu
+  end
+end
+
+define :latincowbell do |t,a|
+  sample :drum_cowbell,release: t,amp: a,cutoff: 80
+  sleep t
+end
+
+define :m32seq do
+  sleep 2*tu
+  latincowbell tu,get[:m32vol]
+  sleep tu
+  latincowbell tu,get[:m32vol]
+  sleep 4*tu
+  latincowbell tu,get[:m32vol]
+  sleep tu
+  latincowbell tu,get[:m32vol]
+  latincowbell tu,get[:m32vol]
+  sleep 3*tu
+end
+
+define :chorusstr do
+  3.times do
+    modstr15 :a4,16*tu,0.75
+    modstr15 :d4,16*tu,0.75
+  end
+  modstr15 :g4,16*tu,0.75
+  modstr15 :a4,16*tu,0.75
+end
+
+define :chorusstr_a do
+  3.times do
+    modpad11 [:a4],16*tu,0.8
+    modpad11 [:d4],16*tu,0.8
+  end
+  modpad11 [:g4],16*tu,0.8
+  modpad11 [:a4],16*tu,0.8
+end
+
+# 4 bars
+define :transitionbass do
+  bassmetaptn [:g3,:g3,:a3]
+  bassptn01 :a3,:e3
+  bassmetaptn [:c3,:g2,:e3,:e3]
+end
+
+# 4 bars
+define :transitionstr do
+  # Gmaj9 Am9
+  modpad11 [:g4,:a4,:b4,:d4],16*tu,get[:strvol]
+  modpad11 [:a4,:b4,:c4,:e4],16*tu,get[:strvol]
+  # Cmaj9 Gmaj9 C7
+  modpad11 [:c4,:d4,:e4,:g4],8*tu,get[:strvol]
+  modpad11 [:g4,:a4,:b4,:d4],8*tu,get[:strvol]
+  modpad11 [:c4,:e4,:g4,:b4],16*tu,get[:strvol]
+end
+
+# 4 bars
+define :transitionarp do
+  arpreps [:g3,:a3,:b3,:c4],4,tu,get[:arpvol]
+  arpreps [:a3,:b3,:c4,:e4],4,tu,get[:arpvol]
+  versemetaarp [
+    [:c4,:d4,:e4,:g4],
+    [:g3,:a3,:b3,:d4],
+    [:c4,:e4,:g4,:b4],
+    []
+  ]
+end
+
+# --------------------------- #
+# orchestration functions end
+# --------------------------- #
+
+# akai mpd lighting
+define :switchon do |pn|
+  set :midirobot,true
+  midi_note_on pn,port: "mpd218_midi_1",channel: 1
+end
+
+define :switchoff do |pn|
+  set :midirobot,true
+  midi_note_off pn,port: "mpd218_midi_1",channel: 1
+end
+
+define :padlighttoggle do |n,s|
+  if s then
+    switchon n
+  else
+    switchoff n
+  end
+end
+
+define :r012switchto do |p|
+  if get[:part]==p then
+    set :part,-1
+    set :prevpart,-1
+    switchoff padnum[p]
+  else
+    if get[:part]!=-1 then
+      switchoff padnum[get[:part]]
+    end
+    set :prevpart,get[:part]
+    set :part,p
+    switchon padnum[p]
+  end
+end
+
+# pad to sequence mapping
+define :trigseq do |n,v|
+  if n==36 then
+    set :bd, (not get[:bd])
+    padlighttoggle n,get[:bd]
+  elsif n==38 then
+    set :tak, (not get[:tak])
+    padlighttoggle n,get[:tak]
+  elsif n==40 then
+    set :m32, (not get[:m32])
+    padlighttoggle n,get[:m32]
+  elsif n==41 then
+    set :m33, (not get[:m33])
+    padlighttoggle n,get[:m33]
+  elsif padnum.include? n then
+    r012switchto partnum[n]
+  end
+end
+
+# --------------------- #
+# akai pad sensor loops
+# --------------------- #
+live_loop :padsensor do
+  n,v = sync "/midi/mpd218_midi_1/1/1/note_on"
+  # if robot activated midi then do nothing
+  if get[:midirobot] then
+    set :midirobot,false
+  else
+    trigseq n,v
+  end
+end
+
+live_loop :padoffsensor do
+  n,v = sync "/midi/mpd218_midi_1/1/1/note_off"
+  # if robot activated midi then do nothing
+  if get[:midirobot] then
+    set :midirobot,false
+  end
+end
+
+live_loop :knobsensor do
+  k,v = sync "/midi/mpd218_midi_1/1/1/control_change"
+  if k==3 then
+    set :arpvol, (v / 127.0)
+  elsif k==9 then
+    set :basvol, (v / 127.0)
+  elsif k==12 then
+    set :strvol, (v / 127.0)
+  elsif k==13 then
+    set :m32vol, (v / 127.0)
+  elsif k==14 then
+    set :bdvol, (v / 127.0)
+  elsif k==15 then
+    set :takvol, (v / 127.0)
+  end
+end
+
+# ---------------- #
+# music live loops #
+# ---------------- #
+live_loop :m30loop do
+  if get[:bd] then
+    bdseq00 0.7,0.9
+  else
+    sleep 16*tu
+  end
+end
+
+with_fx :echo,mix: 0.25,phase: tu do
+  with_fx :hpf,cutoff: 90 do
+    live_loop :m31loop do
+      if get[:tak] then
+        takseq00
+      else
+        sleep 16*tu
+      end
+    end
+  end
+end
+
+live_loop :m32loop do
+  if get[:m32] then
+    m32seq
+  else
+    sleep 4*tu
+  end
+end
+
+with_fx :compressor,mix: 0.32 do
+  live_loop :Bloop do
+    if get[:part]==-1 then
+      sleep 16*tu
+    elsif parts[get[:part]][B]==0 then
+      chorusbass
+    elsif parts[get[:part]][B]==1 then
+      versebass
+    elsif parts[get[:part]][B]==2 then
+      transitionbass
+    else
+      sleep 16*tu
+    end
+  end
+end
+
+with_fx :reverb,mix: 0.2 do
+  live_loop :Sloop do
+    if get[:part]==-1 then
+      sleep 16*tu
+    elsif parts[get[:part]][S]==0 then
+      chorusstr_a
+    elsif parts[get[:part]][S]==1 then
+      versestr
+    elsif parts[get[:part]][S]==2 then
+      transitionstr
+    else
+      sleep 16*tu
+    end
+  end
+end
+
+with_fx :echo,mix: 0.2,phase: 0.5 do
+  live_loop :Aloop do
+    if get[:part]==-1 then
+      sleep 16*tu
+    elsif parts[get[:part]][A]==0 then
+      arpseq02
+    elsif parts[get[:part]][A]==1 then
+      chorusarp
+    elsif parts[get[:part]][A]==2 then
+      versechords
+    elsif parts[get[:part]][A]==3 then
+      transitionarp
+    else
+      sleep 16*tu
+    end
+  end
+end
