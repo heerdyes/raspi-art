@@ -6,6 +6,7 @@ class Mem(Pub):
         self.pd=False
         self.penmode=False
         self.linemode=False
+        self.circlemode=False
         self.state=0
     
     def togglepenmode(self):
@@ -15,6 +16,10 @@ class Mem(Pub):
     def togglelinemode(self):
         self.linemode=not self.linemode
         self.publish(Msg('mem','linemode: %s'%self.linemode))
+    
+    def togglecirclemode(self):
+        self.circlemode=not self.circlemode
+        self.publish(Msg('mem','circlemode: %s'%self.circlemode))
 
 
 class Stationery(Pub):
@@ -26,12 +31,18 @@ class Stationery(Pub):
     def getpen(self):
         return self.pens[self.curr]
     
-    def addpen(self,c):
+    def addpen(self,c,subs):
+        ap=Pen(c)
+        for s in subs:
+            ap.addsub(s)
         self.pens.append(Pen(c))
     
-    def next(self):
+    def nxtpen(self):
         tmp=self.curr
         self.curr=(tmp+1)%len(self.pens)
+        np=self.getpen()
+        self.publish(Msg('nxtpen','switching to (%s)'%np.nm))
+        return np
 
 
 class Pen(Pub):
@@ -52,18 +63,29 @@ class Pen(Pub):
     
     def paint(self):
         strokeWeight(self.sw)
+        stroke(self.c)
         line(pmouseX,pmouseY,mouseX,mouseY)
         line(mouseX,mouseY,mouseX+self.dx,mouseY+self.dy)
     
     def pdot(self):
         strokeWeight(self.sw)
+        stroke(self.c)
         line(pmouseX,pmouseY,mouseX,mouseY)
     
     def pline(self):
         if self.px==-1 or self.py==-1:
             return
         strokeWeight(self.sw)
+        stroke(self.c)
         line(self.px,self.py,mouseX,mouseY)
+    
+    def pcircle(self):
+        if self.px==-1 or self.py==-1:
+            return
+        strokeWeight(self.sw)
+        stroke(self.c)
+        d=sqrt(sq(self.px-mouseX)+sq(self.py-mouseY))
+        circle(mouseX,mouseY,d)
     
     def savedot(self):
         self.px=mouseX

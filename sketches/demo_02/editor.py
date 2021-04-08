@@ -84,7 +84,7 @@ class Ed(Wnd,Pub):
         
     def handleleft(self):
         if self.r==0 and self.c==0:
-            self.publish('already at beginning')
+            self.publish(['stat','already at beginning'])
         elif self.c>0:
             self.c-=1
         elif self.c==0 and self.r>0:
@@ -94,7 +94,7 @@ class Ed(Wnd,Pub):
             
     def handletop(self):
         if self.r==0:
-            self.publish('already topmost line')
+            self.publish(['stat','already topmost line'])
         else:
             prevlinum=self.r-1
             prevln=self.txt[prevlinum]
@@ -119,7 +119,7 @@ class Ed(Wnd,Pub):
         curcol=self.c
         curln=self.txt[currow]
         if currow==len(self.txt)-1:
-            self.publish('already last line')
+            self.publish(['stat','already last line'])
         else:
             nxtrow=currow+1
             nxtln=self.txt[nxtrow]
@@ -128,7 +128,9 @@ class Ed(Wnd,Pub):
             self.r=nxtrow
     
     def savebuffer(self):
-        self.publish('[%s] saving to file: %s ...'%(os.getcwd(),self.nm))
-        with open(self.nm,'w') as f:
+        cwd=os.getcwd()
+        afp=os.path.join(cwd,'fs',self.nm)
+        self.publish(['stat','saving to file: %s'%afp])
+        with open(afp,'w') as f:
             for ln in self.txt:
                 f.write('%s\n'%ln)

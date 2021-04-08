@@ -1,6 +1,7 @@
 from datetime import datetime
 from helper import *
 from editor import *
+from dialog import *
 
 class DemoCtrl(Pub,Sub):
     def __init__(self):
@@ -8,20 +9,31 @@ class DemoCtrl(Pub,Sub):
         Sub.__init__(self,self.recv)
         self.ml,self.mt,self.mr,self.mb=10,10,10,10
         self.sbht=27
-        self.kmode='cmd'
+        self.kmode='cmd' # choose from cmd, edit, dlg
         self.t=0.0
         self.flipflop=False
         self.wnds=[]
         frmrect(self.ml,self.mt,width-self.ml-self.mr,height-self.mt-self.mb-self.sbht,10)
         self.fontocra=createFont('assets/ocr-a_regular.ttf',14)
-        rootwnd=Voidwnd(self.ml+5,self.mt+5,width-self.ml-self.mr-10,height-self.mt-self.mb-self.sbht-10)
+        self.bounds=[self.ml+5,self.mt+5,width-self.ml-self.mr-10,height-self.mt-self.mb-self.sbht-10]
+        rootwnd=Voidwnd(self.bounds[0],self.bounds[1],self.bounds[2],self.bounds[3])
         self.wnds.insert(0,rootwnd)
         self.actwnd=0
+        self.dlgwnd=None
     
     def recv(self,m):
         hdr=m.head
-        msg=m.body
-        self.stat('[%s] %s'%(hdr,msg))
+        car,cdr=m.body[0],m.body[1:]
+        if car=='stat':
+            self.stat('[%s] %s'%(hdr,cdr[0]))
+        elif car=='mvbuf':
+            self.stat('renaming current buffer to %s'%cdr[0])
+            self.wnds[self.actwnd].nm=cdr[0]
+            self.dlgwnd=None
+            self.kmode='cmd'
+            self.renderall()
+        else:
+            self.stat('unknown msg cmd: %s'%car)
         
     def stat(self,msg):
         fill(0)
@@ -34,6 +46,17 @@ class DemoCtrl(Pub,Sub):
         textAlign(LEFT,TOP)
         text('| %s |'%msg,5,height-self.sbht+3)
         noFill()
+    
+    def mkdlg(self,promptmsg):
+        if self.dlgwnd:
+            self.stat('dialog currently active!')
+            return
+        self.stat('readying dialog prompt...')
+        dw=300
+        dh=100
+        self.dlgwnd=Txtdlg(width/2-dw/2,height/2-dh/2,dw,dh,promptmsg)
+        self.dlgwnd.addsub(self)
+        self.kmode='dlg'
     
     def mked(self,nm):
         if self.actwnd==-1:
@@ -48,12 +71,15 @@ class DemoCtrl(Pub,Sub):
         self.wnds[self.actwnd].addsub(self)
     
     def renderall(self):
+        wiperect(self.bounds[0],self.bounds[1],self.bounds[2],self.bounds[3],color(0,0,0))
         for i in range(len(self.wnds)):
-            self.wnds[i].wipe()
             if i==self.actwnd:
                 self.wnds[i].render(color(0,255,0))
             else:
                 self.wnds[i].render(color(0,128,0))
+        if self.dlgwnd:
+            self.dlgwnd.wipe()
+            self.dlgwnd.render(color(0,255,128))
     
     def blinkcursor(self):
         if self.kmode=='edit':
@@ -153,6 +179,8 @@ class DemoCtrl(Pub,Sub):
             self.writecurbuf()
         elif k=='o':
             self.loadfile()
+        elif k=='r':
+            self.mkdlg('new current buffer name:')
         self.renderall()
         
     def currenteditor(self):
