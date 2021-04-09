@@ -1,24 +1,24 @@
 from structs import *
 
 p=None
-stationery=[]
+stnry=None
 whitener=None
 bluepen=None
 sb=None
-ptr=0
 
 def setup():
-    global p,sb,stationery,whitener,bluepen
+    global p,sb,stnry,whitener,bluepen
     size(1280,720)
     background(255)
     stroke(0,128,128)
     bluepen=Pen(color(0,128,128),'bluepen')
     whitener=Pen(color(255,255,255),'whitener')
-    stationery=[bluepen,whitener]
-    p=stationery[0]
+    stnry=Stationery([bluepen,whitener])
     sb=Statbar(0,height-30,width-1,20,color(255,255,255),color(0,100,144))
     bluepen.addsub(sb)
     whitener.addsub(sb)
+    stnry.addsub(sb)
+    p=stnry.getpen()
     sb.stat('ready')
 
 def draw():
@@ -38,7 +38,7 @@ def mouseReleased():
         p.m.state=0
 
 def keyPressed():
-    global p,ptr
+    global p
     sb.stat('%d'%keyCode)
     if key=='c':
         background(255)
@@ -54,6 +54,7 @@ def keyPressed():
     elif key=='l':
         p.m.togglelinemode()
     elif key=='t':
-        sb.stat('toggle whitener/pen')
-        ptr+=1
-        p=stationery[ptr%len(stationery)]
+        p=stnry.nxtpen()
+    elif key=='o':
+        p.m.togglecirclemode()
+        

@@ -23,5 +23,7 @@ def keyPressed():
         dc.cmdhandler(key,keyCode)
     elif dc.kmode=='edit':
         dc.currenteditor().edithandler(key,keyCode)
+    elif dc.kmode=='dlg':
+        dc.dlgwnd.keyhandler(key,keyCode)
     else:
         dc.stat('unknown mode!')

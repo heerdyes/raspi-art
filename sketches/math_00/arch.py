@@ -18,8 +18,7 @@ class Pub:
         for s in self.subs:
             if not isinstance(s,Sub):
                 raise Exception('non-subscriber encountered!')
-            m=Msg(self.pubid,msg)
-            s.receive(m)
+            s.receive(msg)
     
     def addsub(self,sub):
         self.subs.append(sub)

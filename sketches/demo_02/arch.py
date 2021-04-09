@@ -1,7 +1,7 @@
 class Msg:
     def __init__(self,hd,bd):
         self.head=hd
-        self.body=bd
+        self.body=bd # use body as list: (car cdr)
 
 
 class Pub:
@@ -18,14 +18,15 @@ class Pub:
             m=Msg(self.pubid,msg)
             s.receive(m)
     
-    def addsub(self,sub):
-        self.subs.append(sub)
+    def addsub(self,sub0):
+        self.subs.append(sub0)
 
 
 class Sub:
     def __init__(self,callback):
         self.receive=callback
         
+
 class Binode:
     def __init__(self):
         self.a=None

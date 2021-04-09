@@ -35,3 +35,18 @@ def drawlines(x,y,mt,txt,c1,c2):
         text(ln,x+26,lnht)
         lnht+=rowht
         linum+=1
+
+def wipetext(x,y,w,h,c,txt):
+    fill(0)
+    stroke(c)
+    rect(x,y,w,h)
+    fill(c)
+    text(txt,x+10,y+10)
+    noFill()
+
+def wiperect(x,y,w,h,c):
+    fill(0)
+    stroke(c)
+    rect(x,y,w,h)
+    noFill()
+    
