@@ -1,0 +1,253 @@
+# lofi kit
+lofikit="/home/pi/sonicpi/smplkits/LoFi_krome_jazz/"
+tu=0.25
+
+# live variables
+set :m30,false
+set :m31,false
+set :m32,false
+set :m33,false
+set :m20,false
+set :m21,false
+set :m22,false
+set :midirobot,false
+
+# sample instruments
+define :rbd do |t,a|
+  sample lofikit+["lofi_kick_00.wav","lofi_kick_soft_00.wav"].choose,amp: a
+  sleep t
+end
+
+define :rrim do |t,a|
+  sample lofikit+["lofi_rimshot_00.wav","lofi_rimshot_01.wav"].choose,amp: a
+  sleep t
+end
+
+define :rhh do |t,a|
+  sample lofikit+["lofi_hihat_00.wav","lofi_hihat_pedal_00.wav","lofi_hihat_pedal_01.wav","lofi_hihat_pedal_02.wav"].choose,amp: a
+  sleep t
+end
+
+define :rsn do |t,a|
+  sample lofikit+["lofi_snare_00.wav","lofi_snare_01.wav","lofi_snare_02.wav","lofi_snare_hard_00.wav"].choose,amp: a
+  sleep t
+end
+
+define :rcr do |t,a|
+  sample lofikit+["lofi_cymbal_crash_00.wav","lofi_cymbal_crash_01.wav","lofi_cymbal_crash_02.wav"].choose,amp: a
+  sleep t
+end
+
+define :rrd do |t,a|
+  sample lofikit+["lofi_cymbal_ride_00.wav","lofi_cymbal_ride_01.wav","lofi_cymbal_ride_soft_00.wav"].choose,amp: a
+  sleep t
+end
+
+# previous instruments
+define :sinepad do |p,t,a|
+  synth :sine,note: p,amp: 0.27*a,release: 0.3*t,attack: 0.6*t,sustain: 0.1*t
+  synth :sine,note: p+0.08,amp: 0.27*a,release: 0.3*t,attack: 0.6*t,sustain: 0.1*t
+  synth :saw,note: p,amp: 0.25*a,release: 0.3*t,attack: 0.6*t,sustain: 0.1*t,cutoff: 62
+end
+
+define :fmsqbass do |p,a|
+  use_synth :fm
+  play p,amp: rrand(0.6,0.9)*a,release: 0.25,attack: 0.0,cutoff: 60
+  use_synth :supersaw
+  play p+0.02,amp: rrand(0.6,0.9)*a,release: 0.25,attack: 0.0,cutoff: 60
+end
+
+define :modnoise do |p,t,a,n|
+  sp=synth :cnoise,note: p,amp: 0.21*a,release: 0.3*t,attack: 0.6*t,sustain: 0.1*t,cutoff: 110,cutoff_slide: (t / 16.0)
+  16.times do |i|
+    control sp,cutoff: (if i%2==0 then 50 else 90 end)
+    if i%n==0 then
+      fmsqbass p-12,a
+    end
+    sleep (t / 16.0)
+  end
+end
+
+define :modpad11 do |nlist,t,a|
+  nlist.each do |n|
+    sinepad n,t,a
+  end
+  modnoise nlist[0],t,a,2
+end
+
+# instrument sequences
+define :rdseq do |t|
+  4.times do
+    rrd 4*t,1
+  end
+end
+
+define :crseq do |t|
+  rcr 16*t,1
+end
+
+define :bdseq do |t|
+  rbd 7*t,1
+  rbd 8*t,1
+  rbd t,1
+end
+
+define :snseq do |t|
+  2.times do
+    sleep 2*t
+    rsn 2*t,1
+    sleep 3*t
+    rsn 1*t,1
+  end
+end
+
+define :rimseq do |t|
+  sleep 2*t
+  rrim 2*t,1
+  rrim t,1
+  rrim t,1
+  sleep 3*t
+  rrim 2*t,1
+  rrim t,1
+  rrim 4*t,1
+end
+
+define :hhseq do |t|
+  2.times do
+    rhh t,1
+    rhh t,1
+    sleep 3*t
+    rhh t,1
+    sleep 2*t
+  end
+end
+
+define :modpadseq do |t|
+  modpad11 [:c4,:ds4,:g4,:as4],16*t,0.8
+  modpad11 [:f4,:gs4,:c4,:ds4],16*t,0.8
+end
+
+# akai mpd lighting
+define :switchon do |pn|
+  set :midirobot,true
+  midi_note_on pn,port: "mpd218_midi_1",channel: 1
+end
+
+define :switchoff do |pn|
+  set :midirobot,true
+  midi_note_off pn,port: "mpd218_midi_1",channel: 1
+end
+
+define :padlighttoggle do |n,s|
+  if s then
+    switchon n
+  else
+    switchoff n
+  end
+end
+
+# pad to sequence mapping
+define :trigseq do |n,v|
+  if n==36 then
+    set :m30, (not get[:m30])
+    padlighttoggle n,get[:m30]
+  elsif n==38 then
+    set :m31, (not get[:m31])
+    padlighttoggle n,get[:m31]
+  elsif n==40 then
+    set :m32, (not get[:m32])
+    padlighttoggle n,get[:m32]
+  elsif n==41 then
+    set :m33, (not get[:m33])
+    padlighttoggle n,get[:m33]
+  elsif n==43 then
+    set :m20, (not get[:m20])
+    padlighttoggle n,get[:m20]
+  elsif n==45 then
+    set :m21, (not get[:m21])
+    padlighttoggle n,get[:m21]
+  elsif n==47 then
+    set :m22, (not get[:m22])
+    padlighttoggle n,get[:m22]
+  end
+end
+
+# --------------------- #
+# akai pad sensor loops
+# --------------------- #
+live_loop :padsensor do
+  n,v = sync "/midi/mpd218_midi_1/1/1/note_on"
+  # if robot activated midi then do nothing
+  if get[:midirobot] then
+    set :midirobot,false
+  else
+    trigseq n,v
+  end
+end
+
+live_loop :padoffsensor do
+  n,v = sync "/midi/mpd218_midi_1/1/1/note_off"
+  # if robot activated midi then do nothing
+  if get[:midirobot] then
+    set :midirobot,false
+  end
+end
+
+# ---------------- #
+# music live loops #
+# ---------------- #
+live_loop :m20loop do
+  if get[:m20] then
+    rdseq tu
+  else
+    sleep 16*tu
+  end
+end
+
+live_loop :m21loop do
+  if get[:m21] then
+    crseq tu
+  else
+    sleep 16*tu
+  end
+end
+
+live_loop :m22loop do
+  if get[:m22] then
+    modpadseq tu
+  else
+    sleep 16*tu
+  end
+end
+
+live_loop :m30loop do
+  if get[:m30] then
+    bdseq tu
+  else
+    sleep 16*tu
+  end
+end
+
+live_loop :m31loop do
+  if get[:m31] then
+    rimseq tu
+  else
+    sleep 16*tu
+  end
+end
+
+live_loop :m32loop do
+  if get[:m32] then
+    hhseq tu
+  else
+    sleep 16*tu
+  end
+end
+
+live_loop :m33loop do
+  if get[:m33] then
+    snseq tu
+  else
+    sleep 16*tu
+  end
+end

@@ -1,0 +1,127 @@
+# lofi kit
+lofikit="/home/pi/sonicpi/smplkits/LoFi_krome_jazz/"
+
+# sample instruments
+define :rbd do |t,a|
+  sample lofikit+["lofi_kick_00.wav","lofi_kick_soft_00.wav"].choose,amp: a
+  sleep t
+end
+
+define :rrim do |t,a|
+  sample lofikit+["lofi_rimshot_00.wav","lofi_rimshot_01.wav"].choose,amp: a
+  sleep t
+end
+
+define :rhh do |t,a|
+  sample lofikit+["lofi_hihat_00.wav","lofi_hihat_pedal_00.wav","lofi_hihat_pedal_01.wav","lofi_hihat_pedal_02.wav"].choose,amp: a
+  sleep t
+end
+
+define :rsn do |t,a|
+  sample lofikit+["lofi_snare_00.wav","lofi_snare_01.wav","lofi_snare_02.wav","lofi_snare_hard_00.wav"].choose,amp: a
+  sleep t
+end
+
+define :rcr do |t,a|
+  sample lofikit+["lofi_cymbal_crash_00.wav","lofi_cymbal_crash_01.wav","lofi_cymbal_crash_02.wav"].choose,amp: a
+  sleep t
+end
+
+define :rrd do |t,a|
+  sample lofikit+["lofi_cymbal_ride_00.wav","lofi_cymbal_ride_01.wav","lofi_cymbal_ride_soft_00.wav"].choose,amp: a
+  sleep t
+end
+
+# instruments
+define :sinepad do |p,t,a|
+  synth :sine,note: p,amp: 0.27*a,release: 0.3*t,attack: 0.6*t,sustain: 0.1*t
+  synth :sine,note: p+0.08,amp: 0.27*a,release: 0.3*t,attack: 0.6*t,sustain: 0.1*t
+  synth :saw,note: p,amp: 0.25*a,release: 0.3*t,attack: 0.6*t,sustain: 0.1*t,cutoff: 62
+end
+
+define :fmsqbass do |p,a|
+  use_synth :fm
+  play p,amp: rrand(0.6,0.9)*a,release: 0.25,attack: 0.0,cutoff: 60
+  use_synth :supersaw
+  play p+0.02,amp: rrand(0.6,0.9)*a,release: 0.25,attack: 0.0,cutoff: 60
+end
+
+define :modnoise do |p,t,a,n|
+  sp=synth :cnoise,note: p,amp: 0.21*a,release: 0.3*t,attack: 0.6*t,sustain: 0.1*t,cutoff: 110,cutoff_slide: (t / 16.0)
+  16.times do |i|
+    control sp,cutoff: (if i%2==0 then 50 else 90 end)
+    sleep (t / 16.0)
+  end
+end
+
+define :modpad11 do |nlist,t,a|
+  nlist.each do |n|
+    sinepad n,t,a
+  end
+  modnoise nlist[0],t,a,2
+end
+
+# instrument sequences
+# 8 beat
+define :basseq do |t,a|
+  fmsqbass :c3,a
+  sleep t
+  fmsqbass :c4,a
+  sleep t
+  fmsqbass :as2,a
+  sleep t
+  fmsqbass :as3,a
+  sleep t
+  fmsqbass :gs2,a
+  sleep t
+  fmsqbass :gs3,a
+  sleep t
+  fmsqbass :g2,a
+  sleep t
+  fmsqbass :g3,a
+  sleep t
+end
+
+define :synseq do |t,a|
+  ##| modnoise :c3,4*t,1,4
+  ##| modnoise :ds4,1*t,a,4
+  ##| modnoise :ds4,1*t,a,4
+  ##| modnoise :ds4,1*t,a,4
+  ##| modnoise :ds4,1*t,a,4
+  modnoise :ds4,2*t,1,4
+  modnoise :ds4,2*t,1,4
+end
+
+# sonic flow
+tu=0.25
+live_loop :trnloop do
+  cue "/live_loop/drmloop"
+  synseq 1*tu,1
+  ##| sleep 4*tu
+  sleep 4*tu
+end
+
+live_loop :basloop do
+  cue "/live_loop/drmloop"
+  basseq 2*tu,1
+  ##| sleep 16*tu
+end
+
+live_loop :drmloop do
+  1.times do
+    rbd 0,1
+    rhh 2*tu,1
+    rhh 2*tu,1
+    rrim 2*tu,1
+    rhh 2*tu,1
+  end
+  ##| sleep 4*tu
+  ##| 1.times do
+  ##|   rbd 0,1
+  ##|   rhh 2*tu,1
+  ##|   rhh 2*tu,1
+  ##|   rsn 2*tu,1
+  ##|   rhh 2*tu,1
+  ##| end
+  sleep 4*tu
+end

@@ -1,0 +1,30 @@
+define :sinepad do |p,t,a|
+  synth :sine,note: p,amp: 0.27*a,release: 0.3*t,attack: 0.6*t,sustain: 0.1*t
+  synth :sine,note: p+0.08,amp: 0.27*a,release: 0.3*t,attack: 0.6*t,sustain: 0.1*t
+  synth :saw,note: p,amp: 0.25*a,release: 0.3*t,attack: 0.6*t,sustain: 0.1*t,cutoff: 62
+end
+
+define :fmsqbass do |p,a|
+  use_synth :fm
+  play p,amp: rrand(0.6,0.9)*a,release: 0.25,attack: 0.0,cutoff: 60
+  use_synth :supersaw
+  play p+0.02,amp: rrand(0.6,0.9)*a,release: 0.25,attack: 0.0,cutoff: 60
+end
+
+define :modnoise do |p,t,a,n|
+  sp=synth :cnoise,note: p,amp: 0.21*a,release: 0.3*t,attack: 0.6*t,sustain: 0.1*t,cutoff: 110,cutoff_slide: (t / 16.0)
+  16.times do |i|
+    control sp,cutoff: (if i%2==0 then 50 else 90 end)
+    if i%n==0 then
+      fmsqbass p-12,a
+    end
+    sleep (t / 16.0)
+  end
+end
+
+define :modpad11 do |nlist,t,a|
+  nlist.each do |n|
+    sinepad n,t,a
+  end
+  modnoise nlist[0],t,a,2
+end
