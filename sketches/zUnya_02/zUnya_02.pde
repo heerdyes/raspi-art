@@ -8,8 +8,8 @@ void setup(){
   dt=0.005;
   n=6;
   wt=4;
-  size(1280,720);
-  cx=1280/2;
+  size(720,720);
+  cx=720/2;
   cy=720/2;
   background(0);
   stroke(23,230,203);
@@ -43,10 +43,8 @@ void draw(){
 
 void keyPressed(){
   println(keyCode);
-  if(key=='q'){
-    exit();
-  }
   if(key=='p'){
     G=!G;
   }
 }
+
