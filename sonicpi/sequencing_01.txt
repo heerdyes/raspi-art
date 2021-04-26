@@ -1,0 +1,90 @@
+# lofi nu r&b kit
+lofikit="/home/pi/sonicpi/smplkits/LoFi_krome_nurnb/"
+
+# sample instruments
+define :rbd do |t,a|
+  sample lofikit+["kick_00.wav","kick_01.wav","kick_02.wav"].choose,amp: a
+  sleep t
+end
+
+define :bd0 do |t,a|
+  sample lofikit+"kick_00.wav",amp: a
+  sleep t
+end
+
+define :rrim do |t,a|
+  sample lofikit+["rimshot_00.wav","rimshot_01.wav","rimshot_02.wav","rimshot_03.wav","rimshot_04.wav"].choose,amp: a
+  sleep t
+end
+
+define :rhh do |t,a|
+  sample lofikit+["hihat_00.wav","hihat_01.wav","hihat_loud_00.wav"].choose,amp: a
+  sleep t
+end
+
+define :hh0 do |t,a|
+  sample lofikit+"hihat_00.wav",amp: a
+  sleep t
+end
+
+define :hh1 do |t,a|
+  sample lofikit+"hihat_01.wav",amp: a
+  sleep t
+end
+
+define :hh2 do |t,a|
+  sample lofikit+"hihat_loud_00.wav",amp: a
+  sleep t
+end
+
+define :rsn do |t,a|
+  sample lofikit+["snare_00.wav","snare_01.wav","snare_02.wav","snare_03.wav","snare_04.wav"].choose,amp: a
+  sleep t
+end
+
+define :sn0 do |t,a|
+  sample lofikit+"snare_00.wav",amp: a
+  sleep t
+end
+
+define :rsnsw do |t,a|
+  sample lofikit+["snare_synwav_00.wav","snare_synwav_01.wav"].choose,amp: a
+  sleep t
+end
+
+define :rtom do |t,a|
+  sample lofikit+["tom_00.wav","tom_01.wav","tom_02.wav","tom_03.wav"].choose,amp: a
+  sleep t
+end
+
+dt=0.25
+t=0.0
+
+define :xox do |fs,sq,tu,fa|
+  sq.chars.each do |c|
+    if c=='x' then
+      send(fs,tu,fa.call(t))
+    elsif c=='o' then
+      sleep tu
+    end
+  end
+end
+
+live_loop :timeline do
+  t+=dt
+  sleep dt
+end
+
+with_fx :reverb, mix: 0.4 do
+  live_loop :hhl do
+    xox :hh0,'xoox xooo xooo xooo',0.5*dt,lambda {|x| 0.1+0.025*Math.sin(x)}
+  end
+  
+  live_loop :bdl do
+    xox :bd0,'xooo oooo xxoo oooo',dt,lambda {|x| 0.6+0.1*Math.sin(x)}
+  end
+  
+  live_loop :snl do
+    xox :sn0,'oooo xooo oooo xoox',dt,lambda {|x| 0.6+0.1*Math.sin(x)}
+  end
+end
