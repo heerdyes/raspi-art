@@ -6,6 +6,9 @@ File imgdir;
 int zfw;
 String mode="draw";
 int cursor[]=new int[2];
+PFont font;
+int colspc=10;
+int rowspc=15;
 
 void setup(){
   size(1600,900);
@@ -23,6 +26,8 @@ void setup(){
   rectMode(CENTER);
   cursor[0]=50;
   cursor[1]=50;
+  font=createFont("assets/ocr-a_regular.ttf",14);
+  textFont(font);
 }
 
 void draw(){}
@@ -143,8 +148,12 @@ void typeKeyHandler(){
     stroke(0,255,0);
     fill(0,255,0);
   }
-  text(key,cursor[0],cursor[1]);
-  cursor[0]+=10;
+  if(key=='\n'){
+    cursor[1]+=rowspc;
+  }else{
+    text(key,cursor[0],cursor[1]);
+    cursor[0]+=colspc;
+  }
 }
 
 void keyPressed(){
