@@ -1,0 +1,27 @@
+tu=0.25
+t=0.0
+
+define :xox do |smpl,sq,t,a|
+  sq.chars.each do |c|
+    if c=='x' then
+      sample smpl,amp: a
+      sleep t
+    elsif c=='o' then
+      sleep t
+    end
+  end
+end
+
+with_fx :reverb, mix: 0.4 do
+  live_loop :bdloop do
+    xox [:drum_heavy_kick,:drum_bass_hard,:drum_bass_soft].choose,'xooo oooo xooo oooo',0.5*tu,1.0
+  end
+  
+  live_loop :snloop do
+    xox [:drum_snare_hard,:drum_snare_soft].choose,'oooo xoox oooo xooo',0.5*tu,0.8
+  end
+  
+  live_loop :hhloop do
+    xox :drum_cymbal_closed,'xoxx ooox xoxo oooo',0.5*tu,1.0
+  end
+end

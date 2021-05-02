@@ -1,0 +1,124 @@
+# lofi nu r&b kit
+lofikit="/home/pi/sonicpi/smplkits/LoFi_krome_nurnb/"
+set :barctr,0
+
+# sample instruments
+define :rbd do |t,a|
+  sample lofikit+["kick_00.wav","kick_01.wav","kick_02.wav"].choose,amp: a
+  sleep t
+end
+
+define :rrim do |t,a|
+  sample lofikit+["rimshot_00.wav","rimshot_01.wav","rimshot_02.wav","rimshot_03.wav","rimshot_04.wav"].choose,amp: a
+  sleep t
+end
+
+define :rhh do |t,a|
+  sample lofikit+["hihat_00.wav","hihat_01.wav","hihat_loud_00.wav"].choose,amp: a
+  sleep t
+end
+
+define :rsn do |t,a|
+  sample lofikit+["snare_00.wav","snare_01.wav","snare_02.wav","snare_03.wav","snare_04.wav"].choose,amp: a
+  sleep t
+end
+
+define :rsnsw do |t,a|
+  sample lofikit+["snare_synwav_00.wav","snare_synwav_01.wav"].choose,amp: a
+  sleep t
+end
+
+define :rtom do |t,a|
+  sample lofikit+["tom_00.wav","tom_01.wav","tom_02.wav","tom_03.wav"].choose,amp: a
+  sleep t
+end
+
+# synth instruments
+define :abass do |p,t,a|
+  use_synth :dsaw
+  play p,amp: rrand(0.6,0.9)*a,release: 0.75*t,attack: 0.0,cutoff: 60
+  sleep t
+end
+
+define :modnoise do |p,t,a,n|
+  sp=synth :cnoise,note: p,amp: 0.21*a,release: 0.3*t,attack: 0.6*t,sustain: 0.1*t,cutoff: 110,cutoff_slide: (t / 16.0)
+  n.times do |i|
+    control sp,cutoff: (if i%2==0 then 50 else 90 end)
+    sleep (t / n)
+  end
+end
+
+define :synpad do |p,t,a|
+  use_synth :blade
+  play p,amp: a,attack: 0.5*t,release: 0.5*t
+  use_synth :sine
+  play p+12,amp: 0.5*a,attack: 0.75*t,release: 0.25*t
+end
+
+define :synarp do |p,t,a|
+  use_synth :sine
+  play p,amp: 0.9*a,attack: 0.15*t,release: 0.85*t
+  use_synth :prophet
+  play p,amp: 0.5*a,attack: 0,release: 0.45*t
+end
+
+# sequences
+define :bsseq do |t,a|
+  # 1st
+  abass :as1,0.5*t,a
+  abass :c2,0.5*t,a
+  sleep 5*t
+  abass :as1,1.5*t,a
+  abass :c2,0.5*t,a
+end
+
+# live loops
+tu=0.25
+
+##| with_fx :bitcrusher,mix: 0.3,bits: 16 do
+live_loop :basloop do
+  sync :one
+  bsseq tu,1
+end
+##| end
+
+with_fx :echo,mix: 0.4 do
+  live_loop :noiseloop do
+    sync :one
+    modnoise :c3,1*tu,0.9,3
+    modnoise :c3,1.5*tu,0.95,6
+    sleep 2.0*tu
+    modnoise :c3,1.5*tu,0.85,6
+    modnoise :c3,1.0*tu,0.9,3
+    ##| sleep 2*tu
+  end
+end
+
+live_loop :bdloop do
+  cue :one
+  rbd 4*tu,1
+  rsnsw 4*tu,1
+  rbd tu,1
+  rbd 3*tu,1
+  rsnsw 4*tu,1
+  set :barctr,get[:barctr]+1
+end
+
+with_fx :slicer,phase: 0.75*tu,mix: 0.4 do
+  live_loop :padloop do
+    if get[:barctr]%2==0 then
+      r0=ring :g3,:c4,:d4,:ds4,:g4,:ds4,:d4,:c4
+    else
+      r0=ring :g3,:c4,:d4,:ds4,:gs4,:ds4,:d4,:c4
+    end
+    use_synth :sine
+    ##| synarp r0.tick,tu,0.35
+    play r0.tick,amp: 0.25
+    sleep tu
+  end
+end
+
+live_loop :leadloop do
+  synpad (ring :g3,:c4,:as4,:f4,:g4,:f4,:ds3,:d3).tick,8*tu,rrand(0.35,0.6)
+  sleep 8*tu
+end
