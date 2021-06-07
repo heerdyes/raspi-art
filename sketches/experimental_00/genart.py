@@ -15,3 +15,10 @@ def ga01(cx,cy,t):
     lx=h00(1,cx,r,5,0,t)
     ly=h00(3,cy,-r,2.5,0,t)
     line(cx,cy,lx,ly)
+
+def ga02(cx,cy,t):
+    for i in range(16):
+        r=w00(150,50,0.25,0,t)
+        lx=h00(i,cx,r,1,0,t)
+        ly=w00(cy,r,i,i*PI/16,t)
+        circle(lx,ly,1)
