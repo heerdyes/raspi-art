@@ -43,7 +43,7 @@ void graph(float xinit, float yinit) {
     }
     // frame o.d.e.
     d2y=0*dx*dx;
-    dy=( -y * sin(radians(x)) )*dx;
+    dy=( sin(radians(y)) )*dx;
     y+=dy;
     x+=dx;
   }
@@ -58,9 +58,8 @@ void draw() {
   if (yvary) {
     mapy=map(mouseY, 0, height, yk*height/2, -yk*height/2);
   }
-  float r=20.0;
-  for(int i=0;i<180;i+=20){
-    graph(mapx+r*cos(radians(i)), mapy);
+  for (int i=-100; i<100; i+=int(random(7, 14))) {
+    graph(mapx+i, mapy);
   }
 }
 
