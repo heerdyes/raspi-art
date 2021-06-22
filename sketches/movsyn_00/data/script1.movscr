@@ -1,0 +1,14 @@
+# example movie script
+5 -> text 18 generative art
+12 -> clear
+15 -> text 18 it is a form of language bending to produce sound, light, movement
+20 -> clear
+22 -> square 100
+23 -> square 110
+26 -> square 120
+29 -> square 130
+32 -> square 140
+35 -> square 150
+45 -> clear
+46 -> text 30 THE END
+55 -> end
