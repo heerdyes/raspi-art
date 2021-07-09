@@ -1,0 +1,10 @@
+11; next val is assigned to B
+50; B=50
+81; B--
+74; X=B
+75; Y=B
+77; D[X][Y]=128
+128
+98; next val is jump loc
+2;  PC=2
+0
