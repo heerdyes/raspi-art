@@ -12,7 +12,7 @@ Infobar sb;
 int currpage=0;
 int totalpages=psize/screensperpage;
 PrintWriter genewriter;
-String prefix="/mnt/heerdyes/L/GH/heerdyes/raspi-art/sketches/gene_02";
+String prefix="/mnt/heerdyes/L/GH/heerdyes/raspi-art/sketches/gene_01";
 String sndirpath;
 
 void initsession() {
@@ -39,7 +39,7 @@ void initsession() {
 void mkpages(int n) {
   pages=new Worldmonitor[n];
   for (int i=0; i<n; i++) {
-    pages[i]=new Worldmonitor(screensperpage, 262, 276, 5, 5);
+    pages[i]=new Worldmonitor(screensperpage, 528, 425, 5, 5);
   }
 }
 
@@ -119,7 +119,7 @@ void setup() {
   initsession();
   p=new Popu(psize, mrate, 8);
 
-  size(800, 600);
+  size(1600, 900);
   background(255);
   stroke(0);
   textAlign(LEFT, TOP);

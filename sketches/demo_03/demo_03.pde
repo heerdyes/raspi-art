@@ -1,5 +1,5 @@
 PImage m;
-String rootdir="/media/heerdyes/home/heerdyes/L/GH/heerdyes/raspi-art/sketches/demo_03/";
+String rootdir="/mnt/heerdyes/L/GH/heerdyes/raspi-art/sketches/demo_03/";
 ArrayList<String> ring;
 int idx=-1;
 File imgdir;
@@ -169,4 +169,3 @@ void keyPressed(){
     typeKeyHandler();
   }
 }
-
