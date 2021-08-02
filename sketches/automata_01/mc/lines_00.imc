@@ -4,8 +4,7 @@
 74; X=B
 75; Y=B
 77; D[X][Y]=128
-128
+128;pixel grayscale value
 98; next val is jump loc
 2;  PC=2
-79; F5 display
 0
