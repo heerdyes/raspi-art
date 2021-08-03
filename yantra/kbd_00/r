@@ -1,0 +1,5 @@
+#!/bin/sh
+set -e
+gcc $1.c -o $1 -lm
+sudo ./$1
+
