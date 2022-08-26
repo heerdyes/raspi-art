@@ -24,3 +24,6 @@ for i in range(60):
     s.pencolor(b,r,g)
     s.circle(60)
     s.lt(6)
+    
+turtle.done()
+
